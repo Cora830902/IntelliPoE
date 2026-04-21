@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IntelliPoE – AI-Driven PoE Validation Platform | NETGEAR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f6;color:#243046;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:#243046;padding:0 24px;display:flex;align-items:center;gap:20px;height:56px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hdr-logo{display:flex;align-items:center;gap:12px;border-right:1px solid rgba(255,255,255,.18);padding-right:20px}
+.hdr-title{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.ai-badge{background:linear-gradient(135deg,#00c47c,#0097d6);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;letter-spacing:.6px;margin-left:6px;vertical-align:middle}
+.hdr-sub{font-size:12px;color:rgba(255,255,255,.6);font-weight:500}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:18px}
+.conn-pill{display:flex;align-items:center;gap:6px;background:rgba(0,196,124,.15);border:1px solid rgba(0,196,124,.4);border-radius:20px;padding:3px 10px;font-size:11px;color:#4dffa8}
+.cdot{width:7px;height:7px;border-radius:50%;background:#00c47c;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.hl{font-size:11px;color:rgba(255,255,255,.55)}.hv{color:#4dffa8;font-weight:700}
+.app-body{display:flex;flex:1;overflow:hidden}
+.sidebar{width:262px;background:#fff;border-right:1px solid #dde1ea;display:flex;flex-direction:column;gap:10px;padding:12px;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 6px rgba(0,0,0,.04)}
+.stitle{font-size:11px;font-weight:700;color:#00a066;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.port-panel{background:#f7f9fc;border:1px solid #dde1ea;border-radius:8px;padding:8px 6px}
+.port-grid-tbl{border-collapse:collapse;width:100%;font-size:9px;table-layout:fixed}
+.port-grid-tbl th{color:#9aa3b0;text-align:center;padding:1px 0;font-weight:600;font-size:9px;overflow:hidden}
+.port-grid-tbl td{text-align:center;padding:1px 0}
+.pr{width:13px;height:13px;border-radius:50%;border:2px solid #c5ccd8;background:#fff;cursor:pointer;transition:all .15s;display:inline-block}
+.pr:hover{border-color:#00c47c}
+.pr.sel{background:#00c47c;border-color:#00a066;box-shadow:0 0 4px rgba(0,196,124,.4)}
+.pair-b{font-size:9px;color:#00a066;font-weight:700}
+.psa-panel{background:#f7f9fc;border:1px solid #dde1ea;border-radius:8px;padding:10px}
+.ip-opt{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;cursor:pointer;transition:background .15s;font-size:12px;color:#243046}
+.ip-opt:hover{background:#e8f7f0}.ip-opt.sel{background:#d4f5e6;border-left:3px solid #00c47c}
+.ip-rd{width:13px;height:13px;border-radius:50%;border:2px solid #c5ccd8;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ip-rd.sel::after{content:'';width:5px;height:5px;border-radius:50%;background:#00c47c}
+.ip-addr{font-family:monospace;font-weight:600;color:#243046}
+.ip-custom{width:100%;font-size:11px;padding:4px 7px;border:1px solid #c5ccd8;border-radius:4px;background:#fff;color:#243046;margin-top:4px}
+.ip-custom:focus{outline:none;border-color:#00c47c}
+.ai-panel{background:linear-gradient(135deg,#edfaf4,#f0f7ff);border:1px solid #b3e8d0;border-radius:8px;padding:11px;flex:1}
+.ai-hdr{font-size:11px;font-weight:700;color:#00875a;margin-bottom:6px}
+.ai-txt{font-size:11px;color:#374151;line-height:1.55}
+.ai-ins{background:#fff;border-left:3px solid #00c47c;border-radius:0 5px 5px 0;padding:7px 9px;margin-top:7px;font-size:11px;color:#243046;display:none;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ai-ins.show{display:block}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tab-bar{display:flex;background:#fff;border-bottom:2px solid #e2e7ef;padding:0 16px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.04);overflow-x:auto}
+.tb{padding:10px 15px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#6b7280;transition:all .15s;white-space:nowrap;user-select:none;margin-bottom:-2px}
+.tb:hover{color:#243046}.tb.active{color:#243046;border-bottom-color:#00c47c}
+.tb.ait.active{color:#0097d6;border-bottom-color:#0097d6}
+.tp{display:none;flex:1;overflow-y:auto;padding:16px}
+.tp.active{display:block}
+.card{background:#fff;border:1px solid #dde1ea;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.ctitle{font-size:12px;font-weight:700;color:#00875a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.rg{display:flex;flex-direction:column;gap:4px}
+.ri{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;cursor:pointer;transition:background .15s}
+.ri:hover{background:#f0faf5}.ri.sel{background:#d4f5e6}
+.rd{width:13px;height:13px;border-radius:50%;border:2px solid #c5ccd8;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.rd.sel::after{content:'';width:5px;height:5px;border-radius:50%;background:#00c47c}
+.rl{font-size:13px;color:#243046}.rs{font-size:10px;color:#9aa3b0;margin-left:auto}
+.ci{display:flex;align-items:center;gap:7px;padding:3px 5px;border-radius:5px;cursor:pointer;font-size:12px;font-family:monospace;transition:background .15s;color:#243046}
+.ci:hover{background:#f5f7fa}.ci.air{background:#edfaf4;border-left:2px solid #00c47c}
+.ci.run{background:#e8f2ff;animation:pbg 1s infinite}.ci.pass{background:#d4f5e6}.ci.warn{background:#fff7e0}.ci.fail{background:#fde8e8}
+@keyframes pbg{0%,100%{opacity:1}50%{opacity:.65}}
+.cb{width:13px;height:13px;border-radius:3px;border:2px solid #c5ccd8;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s;color:#fff}
+.cb.chk{background:#00c47c;border-color:#00a066}.cb.air{border-color:#00c47c}.cb.air.chk{background:#00c47c}
+.cbt{flex:1}.cbs{font-size:11px;font-weight:700;min-width:42px;text-align:right}
+.sp{color:#00875a}.sf{color:#dc2626}.sw{color:#d97706}.sr{color:#2563eb}
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none}
+.btn-p{background:#243046;color:#fff}.btn-p:hover{background:#1a2438}
+.btn-s{background:#f0f2f6;color:#243046;border:1px solid #dde1ea}.btn-s:hover{background:#e2e7ef}
+.btn-a{background:linear-gradient(135deg,#00c47c,#00a066);color:#fff;box-shadow:0 2px 8px rgba(0,196,124,.3)}.btn-a:hover{opacity:.92}
+.btn-g{background:#00c47c;color:#fff}.btn-g:hover{background:#00a066}
+.btn-d{background:#dc2626;color:#fff}.btn-d:hover{background:#b91c1c}
+.btn-sm{padding:4px 10px;font-size:11px}.btn:disabled{opacity:.4;cursor:not-allowed}.wf{width:100%}
+.al{padding:8px 11px;border-radius:6px;font-size:12px;display:flex;align-items:flex-start;gap:7px}
+.al-i{background:#eff6ff;border-left:3px solid #3b82f6;color:#1d4ed8}
+.al-s{background:#d4f5e6;border-left:3px solid #00c47c;color:#065f46}
+.al-w{background:#fffbeb;border-left:3px solid #f59e0b;color:#92400e}
+.al-a{background:#edfaf4;border-left:3px solid #00c47c;color:#00875a}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.tb-{background:#e8f0fe;color:#2563eb}.tg{background:#d4f5e6;color:#065f46}
+.ty{background:#fffbeb;color:#92400e}.tp2{background:#f3e8ff;color:#6d28d9}.tn{background:#f0f2f6;color:#243046}
+.cfr{display:flex;align-items:center;gap:7px;margin-top:5px}
+.cfl{font-size:11px;color:#9aa3b0;min-width:80px}
+.cft{flex:1;height:5px;background:#e2e7ef;border-radius:3px;overflow:hidden}
+.cff{height:100%;border-radius:3px;transition:width 1.2s ease}
+.cfv{font-size:11px;color:#00875a;min-width:33px;text-align:right;font-weight:700}
+.met{text-align:center;padding:9px}
+.mv{font-size:21px;font-weight:800;color:#243046;font-family:monospace}
+.mu{font-size:11px;color:#9aa3b0}.ml{font-size:11px;color:#6b7280;margin-top:2px}
+.wave-area{background:#f7f9fc;border:1px solid #dde1ea;border-radius:8px;padding:12px}
+.wave-ph{height:150px;display:flex;align-items:center;justify-content:center;color:#c5ccd8;font-size:12px}
+.pbar{height:5px;background:#e2e7ef;border-radius:3px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,#00c47c,#0097d6);border-radius:3px;transition:width .4s ease}
+.spin{width:13px;height:13px;border-radius:50%;border:2px solid #e2e7ef;border-top-color:#00c47c;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sring{width:88px;height:88px;border-radius:50%;border:7px solid #e2e7ef;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;margin:0 auto;color:#243046}
+hr{border:none;border-top:1px solid #e2e7ef;margin:10px 0}
+input[type=number],select{background:#fff;border:1px solid #c5ccd8;color:#243046;border-radius:4px;padding:4px 7px;font-size:12px}
+input[type=number]:focus,select:focus{outline:none;border-color:#00c47c}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:#e2e7ef;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#00c47c;cursor:pointer}
+.rtbl{width:100%;border-collapse:collapse}
+.rtbl th{font-size:10px;color:#9aa3b0;text-align:left;padding:6px 10px;border-bottom:2px solid #e2e7ef;text-transform:uppercase;font-weight:700}
+.rtbl td{font-size:11px;padding:6px 10px;border-bottom:1px solid #f0f2f6;font-family:monospace}
+.rtbl tr:hover td{background:#f7fdf9}
+#toast{position:fixed;top:14px;right:14px;background:#243046;border-radius:8px;padding:10px 16px;font-size:12px;color:#fff;z-index:2000;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:opacity .3s;opacity:0;pointer-events:none;max-width:280px}
+#toast.show{opacity:1}
+.sbar{background:#243046;padding:5px 20px;display:flex;align-items:center;gap:20px;font-size:11px;color:rgba(255,255,255,.55);flex-shrink:0}
+.sbv{color:#4dffa8;font-weight:700;font-family:monospace}
+.dut-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f2f6;font-size:11px}
+.dut-row:last-child{border:none}.dk{color:#9aa3b0}.dv{color:#243046;font-weight:600}
+.pd-st{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:6px;font-size:12px;background:#f7f9fc;border:1px solid #dde1ea}
+.pd-dot{width:9px;height:9px;border-radius:50%;background:#c5ccd8;transition:all .3s;flex-shrink:0}
+.pd-dot.on{background:#00c47c;animation:blink 1.5s infinite;box-shadow:0 0 6px rgba(0,196,124,.5)}
+.tghdr{font-size:10px;font-weight:700;color:#00875a;text-transform:uppercase;letter-spacing:.5px;padding:7px 5px 3px;margin-top:4px}
+.chwrap{position:relative;height:175px}
+/* Center modal */
+.cmodal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center}
+.cmodal-ov.show{display:flex}
+.cmodal{background:#fff;border-radius:12px;padding:32px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative}
+.cmodal-icon{font-size:44px;margin-bottom:12px}
+.cmodal-title{font-size:17px;font-weight:800;color:#243046;margin-bottom:8px}
+.cmodal-msg{font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:20px}
+.cmodal-close{background:#243046;color:#fff;border:none;padding:10px 32px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+.cmodal-close:hover{background:#00875a}
+.cmodal-close.ok{background:#00875a}
+.cmodal-close.warn{background:#d97706}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#f0f2f6}
+::-webkit-scrollbar-thumb{background:#c5ccd8;border-radius:3px}
+
+/* ── AUTO DEMO ── */
+.btn-demo{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.4px;box-shadow:0 2px 8px rgba(245,158,11,.4);transition:all .2s;animation:demoPulse 3s ease-in-out infinite}
+.btn-demo:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(245,158,11,.55)}
+@keyframes demoPulse{0%,100%{box-shadow:0 2px 8px rgba(245,158,11,.4)}50%{box-shadow:0 2px 16px rgba(245,158,11,.7)}}
+/* demo-ov hidden — no step overlay during demo */
+.demo-ov{display:none}
+.demo-step,.demo-steps,.demo-step-ico{display:none}
+.ci.real-fail{background:#fde8e8;border-left:3px solid #dc2626}
+.ci.real-pass{background:#d4f5e6}
+/* Animated score ring */
+@keyframes scoreReveal{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.sring.animate{animation:scoreReveal .6s cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* ── WIZARD ── */
+.wiz-bar{display:flex;gap:0;margin-bottom:16px;border-radius:8px;overflow:hidden;border:1px solid #dde1ea;flex-shrink:0}
+.ws{flex:1;padding:11px 10px;background:#f7f9fc;text-align:center;font-size:12px;font-weight:600;color:#9aa3b0;border-right:1px solid #dde1ea;transition:all .2s;position:relative}
+.ws:last-child{border-right:none}
+.ws.active{background:#243046;color:#fff}
+.ws.done{background:#d4f5e6;color:#00875a}
+.ws .wsn{font-size:9px;opacity:.7;display:block;margin-bottom:2px}
+.wiz-panel{display:none}
+.wiz-panel.active{display:block}
+
+/* ── LEGACY MODAL ── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1500;display:none;align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.legacy-box{background:#fbbf24;border-radius:14px;padding:32px 36px;max-width:440px;width:90%;text-align:center;box-shadow:0 10px 50px rgba(0,0,0,.4);animation:popIn .2s ease}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.legacy-icon{font-size:64px;line-height:1;margin-bottom:16px;color:#000}
+.legacy-title{font-size:18px;font-weight:800;color:#000;margin-bottom:10px}
+.legacy-msg{font-size:13px;color:#1a1a00;line-height:1.65;margin-bottom:20px}
+.legacy-close{background:#000;color:#fbbf24;border:none;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.legacy-close:hover{background:#1a1a00}
+.legacy-cnt{font-size:11px;color:#7a5500;margin-top:10px}
+
+/* ── SPECS TAB ── */
+.specs-search{width:100%;padding:9px 14px;border:2px solid #dde1ea;border-radius:8px;font-size:13px;background:#fff;color:#243046;margin-bottom:14px;transition:border-color .15s}
+.specs-search:focus{outline:none;border-color:#00c47c}
+.specs-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.specs-tbl th{background:#243046;color:#fff;padding:9px 12px;text-align:left;font-size:12.5px;font-weight:700;letter-spacing:.4px;position:sticky;top:0;z-index:5;white-space:nowrap}
+.specs-tbl th:first-child{border-radius:6px 0 0 0}.specs-tbl th:last-child{border-radius:0 6px 0 0}
+.specs-tbl td{padding:9px 12px;border-bottom:1px solid #e2e7ef;color:#374151;vertical-align:middle;font-size:13px}
+.specs-tbl tr:hover td{background:#f7fdf9}
+.specs-tbl tr.no-poe td{color:#9aa3b0}
+.pt-af{background:#e8f0fe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.pt-at{background:#d4f5e6;color:#065f46;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.pt-bt3{background:#f3e8ff;color:#6d28d9;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.pt-bt4{background:#fff7e0;color:#92400e;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.pt-none{background:#f0f2f6;color:#9aa3b0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+
+/* ── HELP TAB ── */
+.help-wrap{max-width:820px;margin:0 auto}
+.help-section{margin-bottom:24px}
+.help-h1{font-size:18px;font-weight:800;color:#243046;margin-bottom:6px;padding-bottom:8px;border-bottom:3px solid #00c47c}
+.help-h2{font-size:13px;font-weight:700;color:#00875a;margin:14px 0 6px;display:flex;align-items:center;gap:7px}
+.help-h2::before{content:'';width:4px;height:14px;background:#00c47c;border-radius:2px;flex-shrink:0}
+.help-p{font-size:12px;color:#374151;line-height:1.75;margin-bottom:8px}
+.help-tbl{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0 12px}
+.help-tbl th{background:#f0f2f6;color:#243046;padding:7px 12px;text-align:left;font-weight:700;border-bottom:2px solid #dde1ea}
+.help-tbl td{padding:7px 12px;border-bottom:1px solid #e2e7ef;color:#374151;vertical-align:top}
+.help-tbl tr:hover td{background:#f7fdf9}
+.help-note{background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:0 6px 6px 0;font-size:12px;color:#78350f;margin:8px 0}
+.help-tip{background:#edfaf4;border-left:4px solid #00c47c;padding:10px 14px;border-radius:0 6px 6px 0;font-size:12px;color:#065f46;margin:8px 0}
+.help-code{font-family:monospace;background:#f0f2f6;padding:2px 6px;border-radius:3px;font-size:11px;color:#243046}
+
+/* ── PoE Trap Log ── */
+.trap-log{font-family:monospace;font-size:10px;background:#0d1b2a;color:#4dffa8;border-radius:6px;padding:8px;max-height:90px;overflow-y:auto;margin-top:8px;line-height:1.6}
+.trap-log .tl-ts{color:#9aa3b0}
+.trap-log .tl-warn{color:#f59e0b}
+
+/* ── AI Step 2 result ── */
+.sifos-cfg-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f2f6;font-size:12px}
+.sifos-cfg-row:last-child{border:none}
+.scr-k{color:#9aa3b0;min-width:140px;font-size:11px}.scr-v{color:#243046;font-weight:600}
+.scr-ai{color:#00875a;font-size:10px;margin-left:auto}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- LEGACY DETECTION MODAL -->
+<div class="modal-ov" id="legacy-modal">
+  <div class="legacy-box">
+    <div class="legacy-icon">⚠</div>
+    <div class="legacy-title">Unsupported Detection Mode</div>
+    <div class="legacy-msg">
+      Sifos PowerSync Interactive 5 does <strong>not support "legacy" detection mode</strong>.<br><br>
+      Legacy (802.3af pre-standard) detection is available as a DUT software configuration option on M4350, but the Sifos PSA hardware cannot emulate or validate this mode.<br><br>
+      The selection will automatically revert to <strong>"4ptdot3af"</strong>.
+    </div>
+    <button class="legacy-close" onclick="closeLegacyModal()">Understood – Revert to 4ptdot3af</button>
+    <div class="legacy-cnt" id="legacy-cnt">Auto-reverting in 5s...</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr-logo">
+    <svg width="130" height="36" viewBox="0 0 130 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,18 10,6 19,12 9,18" fill="#00c47c"/>
+      <polygon points="10,6 22,6 19,12" fill="#1ab86e"/>
+      <polygon points="9,18 19,12 22,24 12,30" fill="#007a4d"/>
+      <polygon points="19,12 22,6 34,18 22,24" fill="#243046"/>
+      <polygon points="22,24 34,18 24,30 12,30" fill="#3a4f6a"/>
+      <text x="40" y="14" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="800" fill="#ffffff" letter-spacing="0.5">NETGEAR<tspan font-size="7" dy="-3">®</tspan></text>
+      <text x="40" y="28" font-family="'Segoe UI',Arial,sans-serif" font-size="9" font-weight="700" fill="rgba(255,255,255,0.75)" letter-spacing="2.5">ENTERPRISE</text>
+    </svg>
+  </div>
+  <div>
+    <span class="hdr-title">IntelliPoE</span>
+    <span class="ai-badge">AI-DRIVEN</span>
+  </div>
+  <span class="hdr-sub">PoE Validation Platform · TEC SMB SQA</span>
+  <div class="hdr-r">
+    <div class="conn-pill"><div class="cdot"></div>Demo Mode</div>
+    <button class="btn-demo" id="btn-auto-demo" onclick="toggleAutoDemo()">▶ Auto Demo</button>
+    <span class="hl">Port: <span class="hv" id="hdr-port">1, 1</span></span>
+    <span class="hl">DUT: <span class="hv" id="hdr-dut">M4350-24X8F8V</span></span>
+    <span class="hl">FW: <span class="hv">v14.0.4.8</span></span>
+  </div>
+</header>
+
+<!-- AUTO DEMO OVERLAY -->
+<div class="demo-ov" id="demo-ov">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:12px;font-weight:800;color:#fff">🎬 Auto Demo Running</span>
+    <button onclick="document.getElementById('demo-ov').classList.remove('show')" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px">✕</button>
+  </div>
+  <div class="pbar" style="margin-top:8px"><div class="pfill" id="demo-pbar" style="width:0%"></div></div>
+  <div class="demo-steps" id="demo-steps">
+    <div class="demo-step" id="ds1"><span class="demo-step-ico">🔌</span>Connect PSA (10.10.0.12)</div>
+    <div class="demo-step" id="ds2"><span class="demo-step-ico">🤖</span>AI Auto Discover PSE</div>
+    <div class="demo-step" id="ds3"><span class="demo-step-ico">▶</span>Run Conformance Tests (127 pts)</div>
+    <div class="demo-step" id="ds4"><span class="demo-step-ico">📊</span>AI Insights — 97.34% score</div>
+  </div>
+  <div id="demo-done" style="display:none;font-size:12px;color:#4dffa8;margin-top:8px;text-align:center">✅ Demo complete!</div>
+</div>
+
+<div class="app-body">
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div>
+    <div class="stitle">Sifos — Slot · Port Selection</div>
+    <div class="port-panel" style="overflow:hidden">
+      <table class="port-grid-tbl"><thead><tr>
+        <th style="width:22px">Slot</th>
+        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+        <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+        <th style="width:24px">Pair</th>
+      </tr></thead><tbody id="ptbody"></tbody></table>
+    </div>
+  </div>
+  <div>
+    <div class="stitle">Sifos IP Config</div>
+    <div class="psa-panel">
+      <div style="font-size:10px;color:#9aa3b0;margin-bottom:6px;font-weight:600">PSA Address Preset</div>
+      <div class="ip-opt sel" id="ip-opt1" onclick="selIP(this,'10.10.0.12')">
+        <div class="ip-rd sel" id="ipr1"></div>
+        <span class="ip-addr">10.10.0.12</span>
+        <span style="font-size:10px;color:#9aa3b0;margin-left:auto">Lab A</span>
+      </div>
+      <div class="ip-opt" id="ip-opt2" onclick="selIP(this,'192.168.221.105')">
+        <div class="ip-rd" id="ipr2"></div>
+        <span class="ip-addr">192.168.221.105</span>
+        <span style="font-size:10px;color:#9aa3b0;margin-left:auto">Lab B</span>
+      </div>
+      <div class="ip-opt" id="ip-opt3" onclick="selIP(this,'custom')">
+        <div class="ip-rd" id="ipr3"></div>
+        <span style="font-size:12px;color:#6b7280">Custom IP</span>
+      </div>
+      <input class="ip-custom" type="text" id="ip-custom-val" placeholder="e.g. 192.168.1.100" style="display:none">
+      <div style="margin-top:6px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:10px;color:#9aa3b0">Active: <span id="active-ip" style="font-family:monospace;color:#00875a;font-weight:700">10.10.0.12</span></span>
+        <button class="btn btn-a btn-sm" onclick="connectPSA()">Connect</button>
+      </div>
+      <div id="psa-status" style="font-size:10px;color:#dc2626;margin-top:4px;display:none"></div>
+    </div>
+  </div>
+  <div class="ai-panel">
+    <div class="ai-hdr">🤖 AI Assistant</div>
+    <div class="ai-txt" id="ai-msg">Ready. Select a Sifos port and click <strong>AI Auto Discover</strong> to begin PSE characterization.</div>
+    <div class="ai-ins" id="ai-ins"></div>
+  </div>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+<div class="tab-bar">
+  <div class="tb active" onclick="stab('specs',this)">M4350 Specs</div>
+  <div class="tb" onclick="stab('pse',this)">Sifos PSE Config</div>
+  <div class="tb" onclick="stab('swtest',this)">M4350 Test</div>
+  <div class="tb" onclick="stab('powerup',this)">Power Up</div>
+  <div class="tb" onclick="stab('conftest',this)">Conf. Test</div>
+  <div class="tb ait" onclick="stab('aiinsights',this)">✨ AI Insights</div>
+
+</div>
+
+<!-- ══ PSE TAB ══ -->
+<div class="tp" id="tab-pse">
+<div class="g3">
+  <div class="card">
+    <div class="ctitle">PSE Attributes</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <button class="btn btn-a wf" id="btn-disc" onclick="autoDiscover()">🤖 AI Auto Discover</button>
+      <button class="btn btn-s wf" onclick="showModal('📂','PSE Attributes Loaded','PSE configuration loaded successfully from <strong>M4350 Port 1</strong>.<br><br>Type: IEEE 802.3at (AT Type-1) · Pairs: 2-Pair · MPS: AC')">Load PSE Attr</button>
+      <button class="btn btn-s wf" onclick="showModal('💾','PSE Attributes Saved','Current PSE configuration has been saved.<br><br>File: <code style=\'font-size:11px;background:#f0f2f6;padding:2px 5px;border-radius:3px\'>PSE_M4350_Port1.attr</code>')">Save PSE Attr</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#9aa3b0">Current PSE: <span style="color:#00875a;font-weight:600" id="cur-pse">psa_local</span></div>
+    <div id="disc-prog" style="display:none;margin-top:10px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+        <div class="spin"></div><span class="sr" style="font-size:11px" id="scan-msg">Initializing...</span>
+      </div>
+      <div class="pbar"><div class="pfill" id="scan-bar" style="width:0%"></div></div>
+    </div>
+    <div id="pse-det" style="display:none;margin-top:10px">
+      <div class="al al-s" style="margin-bottom:7px;font-size:11px">✅ PSE Detected Successfully</div>
+      <div class="cfr"><span class="cfl">Type Match</span><div class="cft"><div class="cff" id="cf1" style="width:0%;background:#00c47c"></div></div><span class="cfv" id="cv1">0%</span></div>
+      <div class="cfr"><span class="cfl">Pair Conf.</span><div class="cft"><div class="cff" id="cf2" style="width:0%;background:#0097d6"></div></div><span class="cfv" id="cv2">0%</span></div>
+      <div class="cfr"><span class="cfl">AI Score</span><div class="cft"><div class="cff" id="cf3" style="width:0%;background:#7c3aed"></div></div><span class="cfv" id="cv3">0%</span></div>
+      <div style="margin-top:9px;font-size:11px;line-height:1.65;color:#374151;background:#f7fdf9;border-radius:6px;padding:8px" id="pse-info"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">PSE Type</div>
+    <div class="rg" id="pse-type-g">
+      <div class="ri sel" onclick="selR('pse-type-g',this)"><div class="rd sel"></div><span class="rl">AT Type-1</span><span class="rs">2</span></div>
+      <div class="ri" onclick="selR('pse-type-g',this)"><div class="rd"></div><span class="rl">AT Type-2</span><span class="rs">2</span></div>
+      <div class="ri" onclick="selR('pse-type-g',this)"><div class="rd"></div><span class="rl">BT Type-3</span><span class="rs">2 or 4</span></div>
+      <div class="ri" onclick="selR('pse-type-g',this)"><div class="rd"></div><span class="rl">BT Type-4</span><span class="rs">4</span></div>
+    </div>
+    <hr>
+    <div class="ctitle" style="margin-bottom:7px">PSE Pairs &amp; Polarity</div>
+    <div class="rg" id="pse-pair-g">
+      <div class="ri" onclick="selR('pse-pair-g',this)"><div class="rd"></div><span class="rl">4-Pair</span></div>
+      <div class="ri sel" onclick="selR('pse-pair-g',this)"><div class="rd sel"></div><span class="rl">ALT A</span><span class="rs">MDI-X</span></div>
+      <div class="ri" onclick="selR('pse-pair-g',this)"><div class="rd"></div><span class="rl">ALT B</span><span class="rs">MDI-X</span></div>
+    </div>
+    <button class="btn btn-p wf" style="margin-top:10px" onclick="showModal('✅','Settings Applied','Sifos PSA settings have been applied successfully.<br><br><strong>PSE Type:</strong> BT Type-3 · <strong>Pairs:</strong> ALT A · <strong>Max Grant:</strong> PHY · <strong>MPS:</strong> AC MPS')">Apply Settings</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="ctitle">Max Power Grant</div>
+      <div class="rg" id="mpg-g">
+        <div class="ri sel" onclick="selR('mpg-g',this)"><div class="rd sel"></div><span class="rl">NONE</span></div>
+        <div class="ri" onclick="selR('mpg-g',this)"><div class="rd"></div><span class="rl">PHY</span></div>
+        <div class="ri" onclick="selR('mpg-g',this)"><div class="rd"></div><span class="rl">LLDP (AT only)</span></div>
+        <div class="ri" onclick="selR('mpg-g',this)"><div class="rd"></div><span class="rl">PHY+LLDP</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">MPS Method</div>
+      <div class="rg" id="mps-g">
+        <div class="ri" onclick="selR('mps-g',this)"><div class="rd"></div><span class="rl">DC MPS</span></div>
+        <div class="ri sel" onclick="selR('mps-g',this)"><div class="rd sel"></div><span class="rl">AC MPS</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Reporting Directory</div>
+      <div style="font-size:12px;color:#00875a;font-family:monospace;background:#f7fdf9;padding:6px 8px;border-radius:4px" id="rep-dir">...\Results\10.10.0.12</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ POWER UP TAB ══ -->
+<div class="tp" id="tab-powerup">
+<div class="g3">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="ctitle">PD Type</div>
+      <div class="rg" id="pd-type-g">
+        <div class="ri sel" onclick="selR('pd-type-g',this)"><div class="rd sel"></div><span class="rl">Type-1/2/3</span></div>
+        <div class="ri" onclick="selR('pd-type-g',this)"><div class="rd"></div><span class="rl">Type-3/4 Single</span></div>
+        <div class="ri" onclick="selR('pd-type-g',this)"><div class="rd"></div><span class="rl">Type-3/4 Dual</span></div>
+        <div class="ri" onclick="selR('pd-type-g',this)"><div class="rd"></div><span class="rl">Class 4 Dual</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">PD Class</div>
+      <div class="rg" id="pd-cls-g">
+        <div class="ri sel" onclick="selPDCls(this,13)"><div class="rd sel"></div><span class="rl">Class 0</span><span class="rs">≤12.95W</span></div>
+        <div class="ri" onclick="selPDCls(this,3.8)"><div class="rd"></div><span class="rl">Class 1</span><span class="rs">≤3.84W</span></div>
+        <div class="ri" onclick="selPDCls(this,6.5)"><div class="rd"></div><span class="rl">Class 2</span><span class="rs">≤6.49W</span></div>
+        <div class="ri" onclick="selPDCls(this,13)"><div class="rd"></div><span class="rl">Class 3</span><span class="rs">≤12.95W</span></div>
+        <div class="ri" onclick="selPDCls(this,25.5)"><div class="rd"></div><span class="rl">Class 4</span><span class="rs">≤25.5W</span></div>
+      </div>
+      <div style="margin-top:7px;font-size:11px">Sig Type: <span class="tag tn">2-Pair</span> PD Watts: <span class="tag tg" id="pdw">13</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Powered Load @ PSE</div>
+    <div class="rg" id="lu-g">
+      <div class="ri sel" onclick="selR('lu-g',this)"><div class="rd sel"></div><span class="rl">Watts</span></div>
+      <div class="ri" onclick="selR('lu-g',this)"><div class="rd"></div><span class="rl">mA</span></div>
+    </div>
+    <div style="margin-top:12px;text-align:center">
+      <div style="font-size:28px;font-weight:800;color:#243046;font-family:monospace" id="lval">13.7</div>
+      <div style="font-size:11px;color:#9aa3b0">W</div>
+      <input type="range" min="1" max="90" value="14" id="lslider" oninput="upLoad(this.value)" style="margin-top:8px">
+    </div>
+    <button class="btn btn-s wf" style="margin-top:9px" onclick="showModal('⚡','Load Adjusted','Powered load updated successfully.<br><br>Current: <strong id=\'ml-val\'>—</strong> W applied to PSE port.')">Adjust Load</button>
+    <hr>
+    <div class="ctitle" style="margin-bottom:7px">MPS Loads</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" onclick="toast('Min Hold.')">Min. Hold</button>
+      <button class="btn btn-s btn-sm" onclick="toast('Unbal A.')">Unbal. A</button>
+      <button class="btn btn-s btn-sm" onclick="toast('Max Drop.')">Max. Drop</button>
+      <button class="btn btn-s btn-sm" onclick="toast('Unbal B.')">Unbal. B</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="ctitle">Power-Up Waveform</div>
+      <div class="rg" id="wv-g">
+        <div class="ri sel" onclick="selR('wv-g',this)"><div class="rd sel"></div><span class="rl">No Trace</span></div>
+        <div class="ri" onclick="selR('wv-g',this)"><div class="rd"></div><span class="rl">Voltage</span></div>
+        <div class="ri" onclick="selR('wv-g',this)"><div class="rd"></div><span class="rl">Current</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Connection Control</div>
+      <div class="pd-st" style="margin-bottom:9px">
+        <div class="pd-dot" id="pd-dot"></div>
+        <span id="pd-stxt" style="font-size:12px;color:#6b7280">PD Disconnected</span>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-g wf" id="btn-con" onclick="connectPD()">Connect PD</button>
+        <button class="btn btn-d wf" id="btn-dis" onclick="disconnectPD()" disabled>Disconnect</button>
+      </div>
+      <div id="pd-met" style="display:none;margin-top:10px">
+        <div class="g3" style="gap:7px">
+          <div class="met"><div class="mv" id="mv">--</div><div class="mu">V</div><div class="ml">Voltage</div></div>
+          <div class="met"><div class="mv" id="mc">--</div><div class="mu">mA</div><div class="ml">Current</div></div>
+          <div class="met"><div class="mv" id="mp">--</div><div class="mu">W</div><div class="ml">Power</div></div>
+        </div>
+        <div class="al al-a" id="ai-pwr" style="margin-top:8px;font-size:11px">🤖 Analyzing...</div>
+      </div>
+    </div>
+    <div class="card"><div class="ctitle">Status</div><div id="pu-status" style="font-size:12px;color:#9aa3b0;min-height:36px">Idle</div></div>
+  </div>
+</div>
+<div class="wave-area" style="margin-top:12px;max-height:220px;overflow:hidden">
+  <div style="font-size:11px;font-weight:700;color:#00875a;margin-bottom:8px">Live Power Waveform</div>
+  <div class="wave-ph" id="wave-ph">[ Connect PD to view live waveform ]</div>
+  <canvas id="wave-chart" style="display:none;height:150px;max-height:150px"></canvas>
+</div>
+</div>
+
+
+<div class="tp" id="tab-conftest">
+<div style="display:grid;grid-template-columns:210px 1fr 190px;gap:12px">
+
+  <!-- Left -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="ctitle">Test Suite</div>
+      <div class="dut-row"><span class="dk">Mode</span><span class="dv">2-Pair</span></div>
+      <div class="dut-row"><span class="dk">Version</span><span class="dv"><span class="tag tn">v5.4.08</span></span></div>
+      <div class="dut-row"><span class="dk">PSE Type</span><span class="dv" id="ts-psetype">Type-1</span></div>
+      <div class="dut-row"><span class="dk">Pwd Pairs</span><span class="dv">2-Pair</span></div>
+      <div class="dut-row"><span class="dk">Max Grant</span><span class="dv">NONE</span></div>
+      <div class="dut-row"><span class="dk">MPS</span><span class="dv">AC</span></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">DUT SW Config</div>
+      <div style="font-size:10px;color:#9aa3b0;margin-bottom:5px">M4350 v14.0.6.8</div>
+      <div class="dut-row">
+        <span class="dk">Pwr Mgmt</span>
+        <select id="dut-pm" style="font-size:10px;padding:2px 4px"><option>Dynamic</option><option>Static</option></select>
+      </div>
+      <div class="dut-row">
+        <span class="dk">Limit Type</span>
+        <select style="font-size:10px;padding:2px 4px"><option>Class</option><option>User</option></select>
+      </div>
+      <div class="dut-row">
+        <span class="dk">Det. Type</span>
+        <select style="font-size:10px;padding:2px 4px"><option>4ptdot3af</option><option>4ptdot3af+legacy</option></select>
+      </div>
+      <div class="dut-row">
+        <span class="dk">Pwr Limit</span>
+        <span><input type="number" value="32" style="width:46px;font-size:10px;padding:2px"> W</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">PD Emulations</div>
+      <div class="rg" id="pde-g">
+        <div class="ri sel" onclick="selR('pde-g',this)"><div class="rd sel"></div><span class="rl" style="font-size:11px">Type-1 15.4W</span></div>
+        <div class="ri" onclick="selR('pde-g',this)"><div class="rd"></div><span class="rl" style="font-size:11px">Type-2 30W</span></div>
+      </div>
+      <hr>
+      <div class="ctitle" style="margin-bottom:6px">Reporting</div>
+      <div class="rg" id="rep-g">
+        <div class="ri sel" onclick="selR('rep-g',this)"><div class="rd sel"></div><span class="rl" style="font-size:11px">Spreadsheet</span></div>
+        <div class="ri" onclick="selR('rep-g',this)"><div class="rd"></div><span class="rl" style="font-size:11px">Text File</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test List -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div class="ctitle" style="margin:0">PSE Tests</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="checkAll()">All</button>
+        <button class="btn btn-a btn-sm" onclick="aiRec()">🤖 AI Recommend</button>
+        <button class="btn btn-s btn-sm" onclick="uncheckAll()">Clear</button>
+      </div>
+    </div>
+    <!-- DUT selector for conformance test -->
+    <div style="margin-bottom:8px;padding:6px 8px;background:#f0f7ff;border:1px solid #bfdbfe;border-radius:6px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:10px;font-weight:700;color:#1d4ed8">DUT Model:</span>
+      <select id="conf-dut-sel" onchange="onConfDutChange()" style="font-size:11px;padding:3px 6px;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-weight:600">
+        <option value="all">All 4 DUTs (M4350 v14.0.4.8)</option>
+        <option value="44M4X4V">M4350-44M4X4V</option>
+        <option value="24X8F8V">M4350-24X8F8V</option>
+        <option value="24G4XF">M4350-24G4XF</option>
+        <option value="40X4C">M4350-40X4C ⚠ LLDP Bug</option>
+      </select>
+      <span style="font-size:10px;color:#9aa3b0;margin-left:auto">Sifos PSA v5.4.11 · 2025-02-03</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+      <div>
+        <div class="tghdr">📡 Detection</div>
+        <div id="t-det_v"       class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">det_v</span><span class="cbs"></span></div>
+        <div id="t-det_i"       class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">det_i</span><span class="cbs"></span></div>
+        <div id="t-det_range"   class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">det_range</span><span class="cbs"></span></div>
+        <div id="t-det_time"    class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">det_time</span><span class="cbs"></span></div>
+        <div id="t-det_rsource" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">det_rsource</span><span class="cbs"></span></div>
+        <div class="tghdr">🏷 Classification</div>
+        <div id="t-class_v"    class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">class_v</span><span class="cbs"></span></div>
+        <div id="t-class_time" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">class_time</span><span class="cbs"></span></div>
+        <div id="t-class_err"  class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">class_err</span><span class="cbs"></span></div>
+        <div id="t-class_lldp" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">class_lldp</span><span style="font-size:9px;color:#dc2626;margin-left:4px">⚠40X4C</span><span class="cbs"></span></div>
+        <div class="tghdr">🔋 MPS</div>
+        <div id="t-mps_dc_valid" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">mps_dc_valid</span><span class="cbs"></span></div>
+        <div id="t-mps_dc_pwrdn" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">mps_dc_pwrdn</span><span class="cbs"></span></div>
+      </div>
+      <div>
+        <div class="tghdr">⚡ Power-On Sequence</div>
+        <div id="t-pwrup_time"   class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwrup_time</span><span class="cbs"></span></div>
+        <div id="t-pwrup_inrush" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwrup_inrush</span><span class="cbs"></span></div>
+        <div id="t-pwron_v"      class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwron_v</span><span class="cbs"></span></div>
+        <div id="t-pwron_pwrcap" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwron_pwrcap</span><span class="cbs"></span></div>
+        <div id="t-pwron_maxi"   class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwron_maxi</span><span class="cbs"></span></div>
+        <div id="t-pwron_overld" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwron_overld</span><span class="cbs"></span></div>
+        <div class="tghdr">🔽 Power-Down Sequence</div>
+        <div id="t-pwrdn_overld" class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwrdn_overld</span><span class="cbs"></span></div>
+        <div id="t-pwrdn_time"   class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwrdn_time</span><span class="cbs"></span></div>
+        <div id="t-pwrdn_v"      class="ci" onclick="tgl(this)"><div class="cb"></div><span class="cbt">pwrdn_v</span><span class="cbs"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <div class="ctitle">Ports</div>
+      <div class="ci" onclick="toggleCb(this)"><div class="cb"></div><span style="font-size:11px">All Ports</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:7px;font-size:10px;color:#9aa3b0">
+        <div>1, ☑1 ☐2</div><div>7, ☐1 ☐2</div>
+        <div>2, ☐1 ☐2</div><div>8, ☐1 ☐2</div>
+        <div>3, ☐1 ☐2</div><div>9, ☐1 ☐2</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Status</div>
+      <div id="conf-st" style="font-size:12px;color:#9aa3b0;min-height:52px">Ready.</div>
+      <div class="pbar" style="margin-top:7px"><div class="pfill" id="tprog" style="width:0%"></div></div>
+      <div style="font-size:10px;color:#9aa3b0;margin-top:3px" id="tcnt">0 / 0</div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Results</div>
+      <div class="dut-row"><span class="dk">PASS</span><span class="dv sp" id="r-p">0</span></div>
+      <div class="dut-row"><span class="dk">WARN</span><span class="dv sw" id="r-w">0</span></div>
+      <div class="dut-row"><span class="dk">FAIL</span><span class="dv sf" id="r-f">0</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Controls -->
+<div style="display:flex;align-items:center;gap:10px;margin-top:11px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280">
+    Cycle: <input type="number" value="1" style="width:46px;font-size:11px">
+  </div>
+  <div class="ci" onclick="toggleCb(this)"><div class="cb"></div><span style="font-size:11px;color:#6b7280">Show Traces</span></div>
+  <button class="btn btn-a" id="btn-seq" onclick="seqTests()" style="padding:8px 24px;font-size:13px">▶ Sequence Tests</button>
+  <button class="btn btn-s" onclick="toast('🔍 Checking connections...')">Check Connects</button>
+  <button class="btn btn-d" id="btn-stop" onclick="stopTests()" disabled>Stop Test</button>
+</div>
+
+<!-- Results table -->
+<div class="card" id="rtcard" style="margin-top:12px;display:none">
+  <div class="ctitle">Test Results</div>
+  <table class="rtbl">
+    <thead><tr><th>Test</th><th>Category</th><th>Expected</th><th>Measured</th><th>Result</th><th>Notes</th></tr></thead>
+    <tbody id="rtbody"></tbody>
+  </table>
+</div>
+</div><!-- /conf test -->
+
+
+
+
+
+<!-- ══ AI INSIGHTS TAB ══ -->
+<div class="tp" id="tab-aiinsights">
+<div class="g3" style="margin-bottom:12px">
+  <div class="card" style="text-align:center">
+    <div class="ctitle">Compliance Score</div>
+    <div class="sring" id="score-ring" style="border-top-color:#00c47c;border-right-color:#00c47c;border-bottom-color:#00c47c"><span id="score-val">--</span></div>
+    <div style="font-size:11px;color:#9aa3b0;margin-top:7px" id="score-lbl">Run tests to calculate</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Detection Summary</div>
+    <div id="ai-det" style="font-size:12px;color:#9aa3b0">No detection data. Run AI Auto Discover first.</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">AI Anomaly Report</div>
+    <div id="ai-anom" style="font-size:12px;color:#9aa3b0">No anomalies detected yet.</div>
+  </div>
+</div>
+<div class="g2" style="margin-bottom:12px">
+  <div class="card">
+    <div class="ctitle">Consumed Power by Class — Static Mode (M4350 v14.0.6.8)</div>
+    <div class="chwrap"><canvas id="cls-chart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Fault Status Distribution</div>
+    <div class="chwrap"><canvas id="flt-chart"></canvas></div>
+  </div>
+</div>
+<div class="card">
+  <div class="ctitle">AI Generated Test Report</div>
+  <div id="ai-rpt" style="font-size:12px;color:#9aa3b0;line-height:1.75">Run the conformance test suite to generate an AI report.</div>
+  <div id="ai-rpt-act" style="display:none;margin-top:10px;gap:7px">
+    <button class="btn btn-a" onclick="toast('📄 Exported to Excel.')">Export to Excel</button>
+    <button class="btn btn-s" onclick="toast('📧 Sent to team.')">Send to Team</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ LLDP TAB ══ -->
+
+<!-- ══ SW TEST TAB ══ -->
+<div class="tp" id="tab-swtest">
+
+<!-- Top: Model selector -->
+<div class="card" style="margin-bottom:12px;padding:12px 16px;background:linear-gradient(135deg,#f3e8ff,#ede9fe);border-color:#c4b5fd">
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#9aa3b0;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">DUT Switch Model</div>
+      <select id="sw-model-sel" onchange="onSwModelChange()" style="font-size:13px;font-weight:700;padding:7px 12px;border:2px solid #7c3aed;border-radius:6px;color:#243046;min-width:200px">
+        <option value="">-- Select Model --</option>
+      </select>
+    </div>
+    <div id="sw-model-info" style="display:none;flex:1;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center"><div style="font-size:10px;color:#9aa3b0">Phase</div><div style="font-size:14px;font-weight:800;color:#243046" id="swmi-phase">—</div></div>
+      <div style="text-align:center"><div style="font-size:10px;color:#9aa3b0">Part #</div><div style="font-size:12px;font-weight:700;font-family:monospace;color:#243046" id="swmi-part">—</div></div>
+      <div style="text-align:center"><div style="font-size:10px;color:#9aa3b0">PoE Standard</div><div style="font-size:12px;font-weight:700;color:#243046" id="swmi-std">—</div></div>
+      <div style="text-align:center"><div style="font-size:10px;color:#9aa3b0">Max/Port</div><div style="font-size:14px;font-weight:800;color:#00875a" id="swmi-maxp">—</div></div>
+      <div style="text-align:center"><div style="font-size:10px;color:#9aa3b0">PoE Budget</div><div style="font-size:12px;font-weight:700;color:#0097d6" id="swmi-budget">—</div></div>
+    </div>
+    <div id="sw-model-ph" style="flex:1;font-size:12px;color:#9aa3b0;font-style:italic">← Select a switch model to begin configuration</div>
+  </div>
+</div>
+
+<!-- SIFOS AUTO-CONFIG full-width strip -->
+<div id="sw-sifos-summary" style="display:none;margin-bottom:12px;background:linear-gradient(135deg,#edfaf4,#e8f4ff);border:1px solid #b3e8d0;border-radius:8px;padding:10px 16px">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <span style="font-size:15px">🤖</span>
+      <span style="font-size:11px;font-weight:800;color:#00875a;text-transform:uppercase;letter-spacing:.6px">Sifos Auto-Config</span>
+    </div>
+    <div style="width:1px;height:28px;background:#b3e8d0;flex-shrink:0"></div>
+    <div id="sw-sifos-rows" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1"></div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:260px 1fr;gap:12px">
+
+<!-- Left: DUT PoE Parameters -->
+<div style="display:flex;flex-direction:column;gap:10px">
+  <div class="card" style="padding:12px">
+    <div class="ctitle" style="margin-bottom:8px">DUT PoE Parameters (M4350 SW)</div>
+
+    <!-- ── PoE Configuration (Global) ── -->
+    <div style="font-size:10px;font-weight:700;color:#00875a;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;border-bottom:1px solid #e2e7ef;padding-bottom:3px">PoE Configuration</div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">System Usage Threshold (1–99%)</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input type="number" id="sw-threshold" value="90" min="1" max="99" style="width:55px;font-size:11px;padding:3px 5px;border:1px solid #c5ccd8;border-radius:4px" oninput="swParams.threshold=this.value">
+        <span style="font-size:10px;color:#9aa3b0">% (triggers SNMP trap)</span>
+      </div>
+      <div style="font-size:10px;color:#f59e0b;margin-top:2px">⚠ M4350-96: SW may allow exceed when Total Budget available</div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Power Management Mode</div>
+      <div class="rg" id="sw-pm-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-pm-g',this,'pm','Dynamic')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Dynamic</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">Real-time</span></div>
+        <div class="ri" onclick="selSwParam('sw-pm-g',this,'pm','Static')"><div class="rd"></div><span class="rl" style="font-size:11px">Static</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">Allocated</span></div>
+      </div>
+    </div>
+
+    <!-- ── PoE Port Configuration ── -->
+    <div style="font-size:10px;font-weight:700;color:#00875a;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;border-bottom:1px solid #e2e7ef;padding-bottom:3px;margin-top:10px">PoE Port Configuration</div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Port Power</div>
+      <div class="rg" id="sw-pp-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-pp-g',this,'port_power','Enable')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Enable</span></div>
+        <div class="ri" onclick="selSwParam('sw-pp-g',this,'port_power','Disable')"><div class="rd"></div><span class="rl" style="font-size:11px">Disable</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">High Power</div>
+      <div class="rg" id="sw-hp-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-hp-g',this,'high_power','Yes')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Yes</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">802.3bt</span></div>
+        <div class="ri" onclick="selSwParam('sw-hp-g',this,'high_power','No')"><div class="rd"></div><span class="rl" style="font-size:11px">No</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">≤802.3at</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Max Power (W)</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input type="number" id="sw-maxpow" value="99.9" min="0.1" max="99.9" step="0.1" style="width:65px;font-size:11px;padding:3px 5px;border:1px solid #c5ccd8;border-radius:4px" oninput="swParams.max_power=this.value">
+        <span style="font-size:10px;color:#9aa3b0">W per port</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Port Priority</div>
+      <div class="rg" id="sw-prio-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-prio-g',this,'priority','Low')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Low</span></div>
+        <div class="ri" onclick="selSwParam('sw-prio-g',this,'priority','High')"><div class="rd"></div><span class="rl" style="font-size:11px">High</span></div>
+        <div class="ri" onclick="selSwParam('sw-prio-g',this,'priority','Critical')"><div class="rd"></div><span class="rl" style="font-size:11px">Critical</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Power Mode</div>
+      <div class="rg" id="sw-pmode-g" style="gap:2px">
+        <div class="ri" onclick="selSwParam('sw-pmode-g',this,'power_mode','802.3af')"><div class="rd"></div><span class="rl" style="font-size:11px">802.3af</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">≤15.4W</span></div>
+        <div class="ri" onclick="selSwParam('sw-pmode-g',this,'power_mode','802.3at')"><div class="rd"></div><span class="rl" style="font-size:11px">802.3at</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">≤30W</span></div>
+        <div class="ri sel" onclick="selSwParam('sw-pmode-g',this,'power_mode','802.3bt')"><div class="rd sel"></div><span class="rl" style="font-size:11px">802.3bt</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">≤90W</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Power Limit Type</div>
+      <div class="rg" id="sw-pl-g" style="gap:2px">
+        <div class="ri" onclick="selSwParam('sw-pl-g',this,'pl','None')"><div class="rd"></div><span class="rl" style="font-size:11px">None</span></div>
+        <div class="ri sel" onclick="selSwParam('sw-pl-g',this,'pl','Class')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Class</span></div>
+        <div class="ri" onclick="selSwParam('sw-pl-g',this,'pl','User')"><div class="rd"></div><span class="rl" style="font-size:11px">User</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Power Limit (W)</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <input type="number" id="sw-powlimit" value="99.9" min="0.1" max="99.9" step="0.1" style="width:65px;font-size:11px;padding:3px 5px;border:1px solid #c5ccd8;border-radius:4px" oninput="swParams.pow_limit=this.value">
+        <span style="font-size:10px;color:#9aa3b0">W (when Type=User)</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Detection Type</div>
+      <div class="rg" id="sw-det-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-det-g',this,'det','4ptdot3af')"><div class="rd sel"></div><span class="rl" style="font-size:11px">4ptdot3af</span></div>
+        <div class="ri" onclick="selSwParam('sw-det-g',this,'det','4ptdot3af+legacy')"><div class="rd"></div><span class="rl" style="font-size:11px">4ptdot3af+legacy</span></div>
+        <div class="ri" id="sw-det-legacy" onclick="selSwParam('sw-det-g',this,'det','legacy')"><div class="rd"></div><span class="rl" style="font-size:11px">legacy</span><span style="font-size:10px;color:#dc2626;margin-left:auto">⚠</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Disconnect Type</div>
+      <div class="rg" id="sw-disc-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-disc-g',this,'disconnect','DC')"><div class="rd sel"></div><span class="rl" style="font-size:11px">DC</span></div>
+        <div class="ri" onclick="selSwParam('sw-disc-g',this,'disconnect','AC+DC')"><div class="rd"></div><span class="rl" style="font-size:11px">AC+DC</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Timer Schedule</div>
+      <select id="sw-timer" style="width:100%;font-size:11px;padding:4px;border:1px solid #c5ccd8;border-radius:4px" onchange="swParams.timer=this.value">
+        <option value="None">None</option>
+        <option value="Schedule1">Schedule 1</option>
+        <option value="Schedule2">Schedule 2</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:7px">
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Fault Status (Expected)</div>
+      <select id="sw-fault" style="width:100%;font-size:11px;padding:4px;border:1px solid #c5ccd8;border-radius:4px" onchange="swParams.fault=this.value">
+        <option value="no_err">No Error</option>
+        <option value="mps_absent">MPS Absent</option>
+        <option value="short">Short</option>
+        <option value="overload">Overload</option>
+        <option value="pwr_denied">Power Denied</option>
+        <option value="thermal">Thermal Shutdown</option>
+        <option value="startup_fail">Startup Failure</option>
+        <option value="ovlo">OVLO</option>
+        <option value="uvlo">UVLO</option>
+      </select>
+    </div>
+
+    <!-- ── PoE Trap Configuration ── -->
+    <div style="font-size:10px;font-weight:700;color:#00875a;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;border-bottom:1px solid #e2e7ef;padding-bottom:3px;margin-top:10px">PoE Trap Configuration</div>
+    <div>
+      <div style="font-size:11px;color:#9aa3b0;margin-bottom:3px">Traps</div>
+      <div class="rg" id="sw-trap-g" style="gap:2px">
+        <div class="ri sel" onclick="selSwParam('sw-trap-g',this,'trap','Enable')"><div class="rd sel"></div><span class="rl" style="font-size:11px">Enable</span><span style="font-size:10px;color:#9aa3b0;margin-left:auto">SNMP</span></div>
+        <div class="ri" onclick="selSwParam('sw-trap-g',this,'trap','Disable')"><div class="rd"></div><span class="rl" style="font-size:11px">Disable</span></div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- Right: Test Item Selector + Execute -->
+<div style="display:flex;flex-direction:column;gap:10px">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="ctitle" style="margin:0">Select Test Items</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="swCheckAll()">All</button>
+        <button class="btn btn-a btn-sm" onclick="swAiRec()">🤖 AI Recommend</button>
+        <button class="btn btn-s btn-sm" onclick="swClearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px" id="sw-test-items">
+      <div>
+        <div class="tghdr">📡 Detection Type</div>
+        <div id="sw-t-det_4pt" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Detection Type: 4ptdot3af</span><span class="cbs"></span></div>
+        <div id="sw-t-det_legacy_plus" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Detection Type: 4ptdot3af+legacy</span><span class="cbs"></span></div>
+        <div id="sw-t-det_legacy" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Detection Type: legacy ⚠</span><span class="cbs"></span></div>
+
+        <div class="tghdr">⚡ Sys Usage Threshold</div>
+        <div id="sw-t-thresh_below" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Sys Usage Threshold: below limit</span><span class="cbs"></span></div>
+        <div id="sw-t-thresh_exceed" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Sys Usage Threshold: exceed limit</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🔋 Power Mgmt Mode</div>
+        <div id="sw-t-pm_dynamic" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Mgmt Mode: Dynamic</span><span class="cbs"></span></div>
+        <div id="sw-t-pm_static" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Mgmt Mode: Static</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🔒 Power Limit Type</div>
+        <div id="sw-t-pl_none" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Limit Type: None</span><span class="cbs"></span></div>
+        <div id="sw-t-pl_class" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Limit Type: Class</span><span class="cbs"></span></div>
+        <div id="sw-t-pl_user" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Limit Type: User</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🔌 Port Power</div>
+        <div id="sw-t-pp_en" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Port Power: Enable</span><span class="cbs"></span></div>
+        <div id="sw-t-pp_dis" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Port Power: Disable</span><span class="cbs"></span></div>
+
+        <div class="tghdr">⚡ High Power</div>
+        <div id="sw-t-hp_yes" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">High Power: Yes</span><span class="cbs"></span></div>
+        <div id="sw-t-hp_no" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">High Power: No</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🏷 Port Priority</div>
+        <div id="sw-t-prio_low" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Port Priority: Low</span><span class="cbs"></span></div>
+        <div id="sw-t-prio_high" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Port Priority: High</span><span class="cbs"></span></div>
+        <div id="sw-t-prio_crit" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Port Priority: Critical</span><span class="cbs"></span></div>
+      </div>
+      <div>
+        <div class="tghdr">⚠️ Fault Status</div>
+        <div id="sw-t-f_no_err" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: No Error</span><span class="cbs"></span></div>
+        <div id="sw-t-f_mps" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: MPS Absent</span><span class="cbs"></span></div>
+        <div id="sw-t-f_short" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: Short</span><span class="cbs"></span></div>
+        <div id="sw-t-f_overload" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: Overload</span><span class="cbs"></span></div>
+        <div id="sw-t-f_denied" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: Power Denied</span><span class="cbs"></span></div>
+        <div id="sw-t-f_thermal" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: Thermal SD</span><span class="cbs"></span></div>
+        <div id="sw-t-f_startup" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: Startup Failure</span><span class="cbs"></span></div>
+        <div id="sw-t-f_ovlo" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: OVLO</span><span class="cbs"></span></div>
+        <div id="sw-t-f_uvlo" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Fault Status: UVLO</span><span class="cbs"></span></div>
+
+        <div class="tghdr">📣 PoE Trap Config</div>
+        <div id="sw-t-trap_en" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Traps: Enable</span><span class="cbs"></span></div>
+        <div id="sw-t-trap_dis" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Traps: Disable</span><span class="cbs"></span></div>
+
+        <div class="tghdr">📶 Power Mode</div>
+        <div id="sw-t-pmode_af" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Mode: 802.3af</span><span class="cbs"></span></div>
+        <div id="sw-t-pmode_at" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Mode: 802.3at</span><span class="cbs"></span></div>
+        <div id="sw-t-pmode_bt" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Power Mode: 802.3bt</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🔁 Disconnect Type</div>
+        <div id="sw-t-disc_dc" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Disconnect Type: DC</span><span class="cbs"></span></div>
+        <div id="sw-t-disc_acdc" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Disconnect Type: AC+DC</span><span class="cbs"></span></div>
+
+        <div class="tghdr">🕐 Timer Schedule</div>
+        <div id="sw-t-timer_none" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Timer Schedule: None</span><span class="cbs"></span></div>
+        <div id="sw-t-timer_sch" class="ci" onclick="swTgl(this)"><div class="cb"></div><span class="cbt">Timer Schedule: Schedule 1</span><span class="cbs"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Run controls -->
+  <div class="card" style="padding:12px 16px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-a" id="btn-sw-run" onclick="runSwTests()" style="padding:9px 28px;font-size:13px">▶ Run Selected Tests</button>
+      <button class="btn btn-d btn-sm" id="btn-sw-stop" onclick="swStop=true" disabled>Stop</button>
+      <div style="flex:1">
+        <div class="pbar"><div class="pfill" id="sw-prog" style="width:0%"></div></div>
+        <div style="font-size:10px;color:#9aa3b0;margin-top:2px" id="sw-status">Ready</div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:13px;font-weight:700">
+        <span>PASS: <span class="sp" id="sw-rp">0</span></span>
+        <span>WARN: <span class="sw" id="sw-rw">0</span></span>
+        <span>FAIL: <span class="sf" id="sw-rf">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results table -->
+  <div class="card" id="sw-rtcard" style="display:none;padding:0;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#243046;color:#fff">
+        <th style="padding:8px 12px;text-align:left;font-size:11px">#</th>
+        <th style="padding:8px 12px;text-align:left;font-size:11px">Test Item</th>
+        <th style="padding:8px 12px;text-align:left;font-size:11px">SW Config Applied</th>
+        <th style="padding:8px 12px;text-align:left;font-size:11px">Sifos Config</th>
+        <th style="padding:8px 12px;text-align:left;font-size:11px">Result</th>
+        <th style="padding:8px 12px;text-align:left;font-size:11px">Notes</th>
+      </tr></thead>
+      <tbody id="sw-rtbody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+</div><!-- /sw test -->
+
+
+<!-- ══ M4350 SPECS TAB ══ -->
+<div class="tp active" id="tab-specs">
+
+<!-- About + Workflow card -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+  <!-- About IntelliPoE -->
+  <div class="card" style="background:linear-gradient(135deg,#243046,#1a2840);border-color:#3a4f6a;color:#fff">
+    <div style="font-size:13px;font-weight:800;color:#00c47c;letter-spacing:-.2px;margin-bottom:6px">What is IntelliPoE?</div>
+    <div style="font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:8px">
+      An AI-driven PoE validation platform for <strong style="color:#4dffa8">NETGEAR TEC SMB SQA</strong>. It automates the test workflow between the <strong style="color:#4dffa8">Sifos PowerSync Interactive 5</strong> analyzer and <strong style="color:#4dffa8">M4350 PSE switches</strong> — from detection, parameter configuration, to result analysis.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="background:rgba(0,196,124,.2);border:1px solid rgba(0,196,124,.4);color:#4dffa8;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px">802.3af / at / bt</span>
+      <span style="background:rgba(0,151,214,.2);border:1px solid rgba(0,151,214,.4);color:#7dd3fc;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px">AI Auto-Config</span>
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px">SNMP Trap</span>
+    </div>
+  </div>
+
+  <!-- Test Workflow -->
+  <div class="card" style="background:linear-gradient(135deg,#f0f7ff,#edfaf4);border-color:#b3d4f5">
+    <div style="font-size:13px;font-weight:800;color:#0074a6;margin-bottom:8px">Test Workflow</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:#0097d6;color:#fff;font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+        <div style="font-size:12px;color:#243046"><strong>Connect Sifos PSA</strong> — Confirm PC can control the PowerSync Interactive 5 via IP</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:#0097d6;color:#fff;font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+        <div style="font-size:12px;color:#243046"><strong>Detect DUT SW</strong> — AI Auto Discover reads M4350 model &amp; firmware via CLI / Sifos port scan</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:#00875a;color:#fff;font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+        <div style="font-size:12px;color:#243046">
+          <strong>Run Tests</strong> — Choose path:<br>
+          <span style="color:#7c3aed;font-weight:600">M4350 Test</span> <span style="color:#9aa3b0">(configure SW params → auto-set Sifos)</span><br>
+          <span style="color:#0097d6;font-weight:600">Conf. Test</span> <span style="color:#9aa3b0">(configure Sifos → compliance check)</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:#00875a;color:#fff;font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</span>
+        <div style="font-size:12px;color:#243046"><strong>Output Result</strong> — PASS / WARN / FAIL with AI analysis &amp; compliance score</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Specs header + search -->
+<div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#edfaf4,#f0f7ff);border-color:#b3e8d0">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#243046">M4350 Series PoE Specifications</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">NETGEAR Enterprise Managed Switch — Complete model comparison with PoE budget details</div>
+    </div>
+    <input class="specs-search" id="specs-search" type="text" placeholder="🔍  Search model, part#, PoE type, budget..." oninput="filterSpecs(this.value)" style="max-width:340px;margin:0;margin-left:auto">
+  </div>
+</div>
+<div class="card" style="overflow-x:auto;padding:0">
+  <table class="specs-tbl" id="specs-tbl">
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Model</th>
+        <th>Part #</th>
+        <th>Form Factor</th>
+        <th>PoE Ports</th>
+        <th>PoE Standard</th>
+        <th>Max/Port</th>
+        <th>Base PoE Budget</th>
+        <th>Max PoE Budget</th>
+        <th>Internal PSU</th>
+        <th>PSU Bays</th>
+      </tr>
+    </thead>
+    <tbody id="specs-body"></tbody>
+  </table>
+</div>
+<div style="font-size:11px;color:#9aa3b0;margin-top:8px;padding:0 4px">
+  <strong>Notes:</strong> Base budget = 1x internal PSU installed. Max budget = all PSU bays populated with max-wattage external PSUs. 1/2-width models are 1U half-rack units. PoE+++ is marketing term for 802.3bt Type4. M4350-16M4V Ports 1-16 all support 802.3bt Type4; Ports 1-8 include etherCON connectors.
+</div>
+</div>
+
+<!-- ══ HELP TAB ══ -->
+<div class="tp" id="tab-help">
+<div class="help-wrap">
+
+  <div class="help-section">
+    <div class="help-h1">PoE Port Configuration Guide</div>
+    <div class="help-p">This guide covers PoE (Power over Ethernet) port configuration for the NETGEAR M4350 series enterprise managed switches. The M4350 supports IEEE 802.3af (PoE), 802.3at (PoE+), and 802.3bt Type3/Type4 (PoE++/PoE+++) depending on the model.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">PoE Standards Overview</div>
+    <table class="help-tbl">
+      <thead><tr><th>Standard</th><th>Marketing Name</th><th>Max Power (PSE)</th><th>Max Power (PD)</th><th>Pairs Used</th><th>Cable</th></tr></thead>
+      <tbody>
+        <tr><td>IEEE 802.3af</td><td>PoE</td><td>15.4W</td><td>12.95W</td><td>2-pair</td><td>Cat3 or higher</td></tr>
+        <tr><td>IEEE 802.3at</td><td>PoE+</td><td>30W</td><td>25.5W</td><td>2-pair</td><td>Cat5e or higher</td></tr>
+        <tr><td>IEEE 802.3bt Type3</td><td>PoE++ / 4PPoE</td><td>60W</td><td>51W</td><td>4-pair</td><td>Cat5e or higher</td></tr>
+        <tr><td>IEEE 802.3bt Type4</td><td>PoE+++ / UPoE+</td><td>99.9W</td><td>71.3W</td><td>4-pair</td><td>Cat5e or higher</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Admin Mode</div>
+    <div class="help-p">The <span class="help-code">Admin Mode</span> field enables or disables PoE on a specific port. When set to <strong>Enable</strong>, the port will attempt to detect and power connected PD (Powered Device) equipment. When set to <strong>Disable</strong>, the port will not provide power regardless of other settings.</div>
+    <div class="help-tip">💡 Tip: Disabling unused PoE ports saves power and reduces budget consumption from the total PoE power pool.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Power Management Mode</div>
+    <div class="help-p">Determines how the switch allocates PoE power budget to ports:</div>
+    <table class="help-tbl">
+      <thead><tr><th>Mode</th><th>Description</th><th>Budget Behavior</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Dynamic</strong></td>
+          <td>Power is allocated based on actual real-time consumption measured by the PSE hardware.</td>
+          <td>Budget deducted = actual consumed watts. Efficient — allows more ports to be powered.</td>
+        </tr>
+        <tr>
+          <td><strong>Static</strong></td>
+          <td>Power is allocated based on the negotiated class or user-configured limit, not actual consumption.</td>
+          <td>Budget deducted = configured maximum (e.g., Class 4 = 31.2W on M4350). Conservative — prevents over-allocation.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="help-note">⚠️ In Static mode, M4350 v14.0.6.8 allocates power based on IEEE class values plus M4350-specific overhead: C0=16.2W, C1=4.2W, C2=7.4W, C3=16.2W, C4=31.2W, C5=48.6W, C6=65W, C7=81.8W, C8=97W.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Detection Type</div>
+    <div class="help-p">Controls which IEEE detection method the PSE uses to identify valid PD devices. Invalid or unsupported devices will not be powered.</div>
+    <table class="help-tbl">
+      <thead><tr><th>Option</th><th>Description</th><th>Sifos Support</th></tr></thead>
+      <tbody>
+        <tr><td><strong>4ptdot3af</strong></td><td>Standard IEEE 802.3af 4-point detection. Most compatible. Recommended for all standard PoE devices.</td><td><span style="color:#00875a;font-weight:700">✅ Supported</span></td></tr>
+        <tr><td><strong>4ptdot3af + legacy</strong></td><td>Extended detection — tries standard first, falls back to pre-standard detection for older proprietary devices.</td><td><span style="color:#00875a;font-weight:700">✅ Supported</span></td></tr>
+        <tr><td><strong>legacy</strong></td><td>Pre-802.3af proprietary detection only. Used for very old pre-standard PoE devices (rare). Not recommended.</td><td><span style="color:#dc2626;font-weight:700">❌ Not Supported by Sifos</span></td></tr>
+      </tbody>
+    </table>
+    <div class="help-note">⚠️ Selecting "legacy" detection on Sifos PowerSync Interactive 5 is not supported. The system will automatically revert to "4ptdot3af" if selected.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Power Limit Type</div>
+    <div class="help-p">Controls the maximum power the switch will deliver to a port, providing a ceiling above which power will be cut:</div>
+    <table class="help-tbl">
+      <thead><tr><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>None</strong></td><td>No software-imposed power limit. The hardware physical limit applies.</td></tr>
+        <tr><td><strong>Class</strong></td><td>Power limit set according to IEEE 802.3 class negotiation result. PSE will not deliver more than the class maximum.</td></tr>
+        <tr><td><strong>User</strong></td><td>Administrator-defined wattage limit (1–99W). Overrides class-based limits. Useful for budget control.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Threshold Power</div>
+    <div class="help-p">The <span class="help-code">Threshold Power</span> setting defines a <strong>soft warning threshold</strong> in watts. When a port's consumed power exceeds this value, a trap/alert is generated.</div>
+    <div class="help-note">⚠️ <strong>Known Issue M4350-96:</strong> On M4350-96 variants, the Threshold Power is treated as a soft limit — the switch will continue supplying power beyond the threshold value as long as the Total PoE Power Available budget is not exceeded. This is expected behavior and should be documented as a Known Issue in test reports.</div>
+    <div class="help-tip">💡 Tip: Set Threshold Power slightly below the maximum expected device consumption for early warning without service interruption.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">PoE Trap Configuration</div>
+    <div class="help-p">PoE traps are SNMP notifications sent to configured trap receivers when PoE events occur on a port:</div>
+    <table class="help-tbl">
+      <thead><tr><th>Event</th><th>SNMP Trap Sent</th></tr></thead>
+      <tbody>
+        <tr><td>PD device connected and powered</td><td>pethPsePortOnOffNotification (Power ON)</td></tr>
+        <tr><td>PD device disconnected / MPS absent</td><td>pethPsePortOnOffNotification (Power OFF)</td></tr>
+        <tr><td>Port power exceeded threshold</td><td>pethPsePortPowerMaintenanceStatus</td></tr>
+        <tr><td>Port overload or fault detected</td><td>pethMainPowerUsageOnNotification</td></tr>
+        <tr><td>Total budget exceeded</td><td>pethMainPowerUsageOffNotification</td></tr>
+      </tbody>
+    </table>
+    <div class="help-p">To enable traps: navigate to <strong>Switching → PoE → PoE Port Configuration</strong>, select the port, and set <strong>Traps</strong> to <strong>Enable</strong>. Configure SNMP trap receivers under <strong>System → SNMP → Trap Receivers</strong>.</div>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Port Priority</div>
+    <div class="help-p">When the total PoE power demand exceeds the available budget, the switch uses port priority to determine which ports remain powered:</div>
+    <table class="help-tbl">
+      <thead><tr><th>Priority</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Critical</strong></td><td>Highest priority. Port retains power even when budget is tight. Use for life-safety devices (cameras, access control).</td></tr>
+        <tr><td><strong>High</strong></td><td>Medium-high priority. Powered before Low ports.</td></tr>
+        <tr><td><strong>Low</strong></td><td>Default priority. First ports to be powered down under budget stress.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Fault Status Reference</div>
+    <table class="help-tbl">
+      <thead><tr><th>Fault Code</th><th>Description</th><th>Typical Cause</th></tr></thead>
+      <tbody>
+        <tr><td>No Error</td><td>Port operating normally</td><td>—</td></tr>
+        <tr><td>MPS Absent</td><td>Maintain Power Signature not detected</td><td>PD removed or faulty MPS circuit</td></tr>
+        <tr><td>Short</td><td>Short circuit detected on port</td><td>Cable damage or defective PD</td></tr>
+        <tr><td>Overload</td><td>Port exceeded hardware current limit</td><td>PD power demand exceeded PSE maximum</td></tr>
+        <tr><td>Power Denied</td><td>Budget insufficient to power port</td><td>Total PoE budget exhausted; increase PSU or reduce load</td></tr>
+        <tr><td>Thermal Shutdown</td><td>PSE chip temperature too high</td><td>Inadequate ventilation or ambient temperature too high</td></tr>
+        <tr><td>Startup Failure</td><td>PD did not complete power-up handshake</td><td>Non-compliant PD or cable issue</td></tr>
+        <tr><td>OVLO</td><td>Over-Voltage Lockout — PSU voltage too high</td><td>PSU fault or out-of-spec voltage</td></tr>
+        <tr><td>UVLO</td><td>Under-Voltage Lockout — PSU voltage too low</td><td>PSU overloaded or out-of-spec voltage</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">PoE Power-Up Sequence</div>
+    <div class="help-p">When a PD is connected, M4350 follows this IEEE-compliant power-up state machine:</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">
+      <div style="background:#243046;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Detection</div>
+      <div style="color:#9aa3b0;align-self:center;font-size:16px">→</div>
+      <div style="background:#0097d6;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Classification</div>
+      <div style="color:#9aa3b0;align-self:center;font-size:16px">→</div>
+      <div style="background:#7c3aed;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Power-Up</div>
+      <div style="color:#9aa3b0;align-self:center;font-size:16px">→</div>
+      <div style="background:#00c47c;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Operation</div>
+      <div style="color:#9aa3b0;align-self:center;font-size:16px">→</div>
+      <div style="background:#f59e0b;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Monitor</div>
+      <div style="color:#9aa3b0;align-self:center;font-size:16px">→</div>
+      <div style="background:#dc2626;color:#fff;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700">Power Removal</div>
+    </div>
+    <table class="help-tbl">
+      <thead><tr><th>Phase</th><th>Duration</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Detection</td><td>&lt;400ms</td><td>PSE applies 2.7–10.1V detection signal. Measures signature resistance (25kΩ for valid PD).</td></tr>
+        <tr><td>Classification</td><td>&lt;75ms</td><td>PSE applies 14.5–20.5V. PD draws class-specific current to identify power requirement.</td></tr>
+        <tr><td>Power-Up</td><td>&lt;400ms</td><td>PSE ramps port voltage to 44–57V. Inrush current &lt;500mA.</td></tr>
+        <tr><td>Operation</td><td>Continuous</td><td>PSE monitors port voltage, current, MPS. Delivers up to class maximum power.</td></tr>
+        <tr><td>Monitor</td><td>Continuous</td><td>MPS (AC or DC) periodically verified. Power budget monitored.</td></tr>
+        <tr><td>Power Removal</td><td>&lt;75ms</td><td>If MPS absent or fault, PSE removes power within 75ms.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="help-section">
+    <div class="help-h2">Related Documentation</div>
+    <div class="help-p">For complete configuration details, refer to the M4350 User Manual (M4350_UM_EN.pdf) Chapter: <span class="help-code">Switching → PoE → PoE Port Configuration</span>. For hardware specifications and PoE budgets by model, see the M4350 Hardware Installation Guide (M4350_HIG_EN.pdf).</div>
+  </div>
+
+</div>
+</div><!-- /help -->
+
+</div><!-- /content -->
+</div><!-- /app-body -->
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <span>PWR A: <span class="sbv" id="sb-a">--</span></span>
+  <span>PWR B: <span class="sbv" id="sb-b">--</span></span>
+  <span>LAN: <span class="sbv" id="sb-lan">--</span></span>
+  <span style="margin-left:auto">PSA: <span class="sbv" id="sb-ip">10.10.0.12</span></span>
+  <span>PSE: <span class="sbv" id="sb-pse">--</span></span>
+  <span>Port: <span class="sbv" id="sb-port">1, 1</span></span>
+</div>
+
+<script>
+// ── STATE ──
+let pdConnected=false,testsRunning=false,waveChart=null,waveIv=null;
+let currentIP='10.10.0.12',trapEnabled=true,legacyTimer=null;
+let autoDemoRunning=false;  // declared early so toast() can check it
+let wizCurrentStep=1,currentSwType='at';
+let planRunning=false,planStop=false,selectedModel=null,selectedCat=null;
+
+// ── TEST CATEGORIES ──
+const CATS=[
+  {id:'type_verify',   label:'Type Verification',  icon:'📡', desc:'Verify PSE type matches configured IEEE standard'},
+  {id:'detection',     label:'Detection Type',      icon:'🔍', desc:'Test all 3 M4350 detection type configurations'},
+  {id:'threshold',     label:'Threshold Power',     icon:'⚡', desc:'Consumed power vs threshold boundary behavior'},
+  {id:'power_mgmt',    label:'Power Management',    icon:'🔋', desc:'Dynamic vs Static power management mode'},
+  {id:'power_limit',   label:'Power Limit Type',    icon:'🔒', desc:'None / Class / User power limit configurations'},
+  {id:'fault_status',  label:'Fault Status',        icon:'⚠️', desc:'All 9 fault conditions detection & flagging'},
+  {id:'poe_trap',      label:'PoE Trap Config',     icon:'📣', desc:'SNMP trap enable/disable behavior verification'},
+];
+
+const TAG_TO_SIFOS={af:'af',at:'at',bt4:'bt4',bt3:'bt3'};
+
+function getTestCases(catId,model){
+  const poeTag=model?model.poe_tag:'at';
+  const sType=SIFOS_CFG_MAP[TAG_TO_SIFOS[poeTag]]||SIFOS_CFG_MAP.at;
+  const maxW={af:'15.4W',at:'30W',bt3:'60W',bt4:'90W'}[poeTag]||'30W';
+  const cases={
+    type_verify:[
+      {id:'TC-01',sw:`Standard: ${model?model.poe_type:'802.3at'}`,sifos:`PSE Type: ${sType.type} · Pairs: ${sType.pairs} · Max: ${maxW}`,exp:'PASS',res:'PASS',note:''},
+    ],
+    detection:[
+      {id:'TC-01',sw:'Detection Type: 4ptdot3af',          sifos:`Standard 4-point · Det V: 2.7–10.1V · Sig R: 23–26kΩ`,  exp:'PASS',res:'PASS',note:'IEEE 802.3 compliant detection'},
+      {id:'TC-02',sw:'Detection Type: 4ptdot3af+legacy',   sifos:`Extended mode · 4-point + legacy fallback enabled`,       exp:'PASS',res:'PASS',note:'SW falls back to legacy if 4pt fails'},
+      {id:'TC-03',sw:'Detection Type: legacy',             sifos:`⚠ Not supported by Sifos PSA`,                            exp:'WARN', res:'WARN', note:'Sifos cannot emulate/validate legacy detection — SW auto-reverts to 4ptdot3af'},
+    ],
+    threshold:[
+      {id:'TC-01',sw:'Threshold: 15W | Load: 10W (below)',  sifos:`Load: 10W · Monitor consumed power`,                    exp:'PASS',res:'PASS',note:'Consumed < Threshold → no alert'},
+      {id:'TC-02',sw:'Threshold: 15W | Load: 20W (exceed)', sifos:`Load: 20W · Verify threshold behavior`,                 exp:'WARN', res:'WARN', note:'⚠ Known M4350-96: SW allows exceeding threshold when Total PoE Budget is available'},
+    ],
+    power_mgmt:[
+      {id:'TC-01',sw:'Power Mgmt: Dynamic',  sifos:`Measure actual consumed power · Mode: real-time`,                     exp:'PASS',res:'PASS',note:'Dynamic: budget deducted = actual W consumed'},
+      {id:'TC-02',sw:'Power Mgmt: Static',   sifos:`Measure allocated class power · Mode: C0=16.2W C4=31.2W`,            exp:'PASS',res:'PASS',note:'Static: budget deducted = class max (M4350 values)'},
+    ],
+    power_limit:[
+      {id:'TC-01',sw:'Limit Type: None',                sifos:`No SW limit · HW ceiling only · Load: ${maxW}`,           exp:'PASS',res:'PASS',note:'No software power ceiling applied'},
+      {id:'TC-02',sw:`Limit Type: Class (${maxW} max)`, sifos:`Enforce IEEE class limit: ${maxW} · Cutoff if exceeded`,  exp:'PASS',res:'PASS',note:'Class limit per IEEE 802.3 negotiated class'},
+      {id:'TC-03',sw:'Limit Type: User = 25W',          sifos:`Enforce user limit: 25W · Cutoff at 25W`,                 exp:'PASS',res:'PASS',note:'User-defined ceiling regardless of class'},
+    ],
+    fault_status:[
+      {id:'TC-01',sw:'Expected: No Error',          sifos:'Normal load · PSE operating',        exp:'PASS',res:'PASS',note:'PSE powered, no fault flags'},
+      {id:'TC-02',sw:'Expected: MPS Absent',        sifos:'Remove MPS signal → power-down',     exp:'PASS',res:'PASS',note:'MPS absent → port de-energized within 75ms'},
+      {id:'TC-03',sw:'Expected: Short',             sifos:'Apply short circuit on port',         exp:'PASS',res:'PASS',note:'PSE detects short, removes power immediately'},
+      {id:'TC-04',sw:'Expected: Overload',          sifos:'Exceed class current limit',           exp:'PASS',res:'PASS',note:'Current exceeds class max → overload flag'},
+      {id:'TC-05',sw:'Expected: Power Denied',      sifos:'Exhaust total PoE budget',             exp:'PASS',res:'PASS',note:'No budget available → port denied'},
+      {id:'TC-06',sw:'Expected: Thermal Shutdown',  sifos:'Simulate PSE chip over-temp',         exp:'PASS',res:'PASS',note:'Thermal SD flag set, port removed'},
+      {id:'TC-07',sw:'Expected: Startup Failure',   sifos:'Block power-up handshake sequence',   exp:'PASS',res:'PASS',note:'PD fails handshake → startup_fail flag'},
+      {id:'TC-08',sw:'Expected: OVLO',              sifos:'PSU voltage above OVLO threshold',    exp:'PASS',res:'PASS',note:'PSU V too high → OVLO lockout'},
+      {id:'TC-09',sw:'Expected: UVLO',              sifos:'PSU voltage below UVLO threshold',    exp:'PASS',res:'PASS',note:'PSU V too low → UVLO lockout'},
+    ],
+    poe_trap:[
+      {id:'TC-01',sw:'Trap Config: Enable',   sifos:'Connect PD → verify SNMP trap fired',       exp:'PASS',res:'PASS',note:'pethPsePortOnOffNotification sent to trap receiver'},
+      {id:'TC-02',sw:'Trap Config: Disable',  sifos:'Connect PD → verify no SNMP trap sent',     exp:'PASS',res:'PASS',note:'No notification despite power event'},
+    ],
+  };
+  return cases[catId]||[];
+}
+
+// ── MODEL DROPDOWN INIT ──
+function initModelDropdown(){
+  const sel=document.getElementById('model-sel');
+  if(!sel)return;
+  M4350_SPECS.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s.model;opt.textContent=`${s.model}  (${s.poe_type})`;
+    sel.appendChild(opt);
+  });
+}
+
+function onModelChange(){
+  const val=document.getElementById('model-sel').value;
+  selectedModel=M4350_SPECS.find(s=>s.model===val)||null;
+  const bar=document.getElementById('model-info-bar');
+  const ph=document.getElementById('model-placeholder');
+  if(selectedModel){
+    bar.style.display='flex';ph.style.display='none';
+    document.getElementById('mi-phase').textContent='Phase '+selectedModel.phase;
+    document.getElementById('mi-part').textContent=selectedModel.part;
+    document.getElementById('mi-std').textContent=selectedModel.poe_type;
+    document.getElementById('mi-maxp').textContent=selectedModel.max_port;
+    document.getElementById('mi-budget').textContent=selectedModel.budget_base+'–'+selectedModel.budget_max;
+    document.getElementById('mi-form').textContent=selectedModel.form;
+    document.getElementById('mi-ports').textContent=selectedModel.poe_ports;
+    if(selectedCat)buildPlan();
+  } else {
+    bar.style.display='none';ph.style.display='block';
+    document.getElementById('tc-plan').style.display='none';
+    document.getElementById('tc-placeholder').style.display='block';
+  }
+}
+
+// ── CATEGORY LIST INIT ──
+function initCatList(){
+  const list=document.getElementById('cat-list');
+  if(!list)return;
+  CATS.forEach(c=>{
+    const div=document.createElement('div');
+    div.id='cat-'+c.id;
+    div.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:all .15s;border:1px solid #e2e7ef;background:#fff;margin-bottom:4px';
+    div.innerHTML=`<span style="font-size:16px">${c.icon}</span><div><div style="font-size:12px;font-weight:700;color:#243046">${c.label}</div><div style="font-size:10px;color:#9aa3b0">${c.desc.substring(0,36)}…</div></div>`;
+    div.onmouseenter=()=>{if(selectedCat!==c.id)div.style.background='#f0faf5';}
+    div.onmouseleave=()=>{if(selectedCat!==c.id)div.style.background='#fff';}
+    div.onclick=()=>selectCat(c.id);
+    list.appendChild(div);
+  });
+}
+
+function selectCat(catId){
+  selectedCat=catId;
+  CATS.forEach(c=>{
+    const el=document.getElementById('cat-'+c.id);
+    if(el){el.style.background=c.id===catId?'#d4f5e6':'#fff';el.style.borderColor=c.id===catId?'#00c47c':'#e2e7ef';}
+  });
+  if(selectedModel)buildPlan();
+  else toast('⚠️ Please select a switch model first.');
+}
+
+function buildPlan(){
+  const cat=CATS.find(c=>c.id===selectedCat);
+  const cases=getTestCases(selectedCat,selectedModel);
+  document.getElementById('tc-placeholder').style.display='none';
+  document.getElementById('tc-plan').style.display='block';
+  document.getElementById('plan-title').textContent=`${cat.icon} ${cat.label}`;
+  document.getElementById('plan-desc').textContent=cat.desc;
+  document.getElementById('plan-count').textContent=`${cases.length} test case${cases.length>1?'s':''}`;
+  document.getElementById('plan-prog').style.width='0%';
+  document.getElementById('plan-status').textContent='Ready';
+  document.getElementById('pr-p').textContent=0;document.getElementById('pr-w').textContent=0;document.getElementById('pr-f').textContent=0;
+  document.getElementById('btn-run-plan').disabled=false;
+  const tbody=document.getElementById('tc-tbody');
+  tbody.innerHTML='';
+  cases.forEach(tc=>{
+    const tr=document.createElement('tr');
+    tr.id='tc-row-'+tc.id;
+    tr.style.borderBottom='1px solid #f0f2f6';
+    tr.innerHTML=`
+      <td style="padding:9px 12px;font-family:monospace;font-size:11px;color:#9aa3b0;white-space:nowrap">${tc.id}</td>
+      <td style="padding:9px 12px;font-size:12px;color:#243046;white-space:nowrap">${tc.sw}</td>
+      <td style="padding:9px 12px;font-size:11px;color:#374151;font-family:monospace">${tc.sifos}</td>
+      <td style="padding:9px 12px;white-space:nowrap"><span id="exp-${tc.id}" class="tag ${tc.exp==='PASS'?'tg':tc.exp==='WARN'?'ty':'tn'}">${tc.exp}</span></td>
+      <td style="padding:9px 12px;white-space:nowrap"><span id="res-${tc.id}" style="font-size:12px;color:#9aa3b0;font-weight:700">—</span></td>
+      <td style="padding:9px 12px;font-size:10px;color:#d97706">${tc.note}</td>`;
+    tbody.appendChild(tr);
+  });
+  setAI(`🤖 AI generated <strong>${cases.length}</strong> test cases for <strong>${selectedModel.model}</strong><br>Category: ${cat.label}`,`▶ Click "Run All Test Cases" to begin`);
+}
+
+async function runTestPlan(){
+  if(planRunning)return;
+  if(!selectedModel||!selectedCat){toast('⚠️ Select model and test category first.');return;}
+  planRunning=true;planStop=false;
+  document.getElementById('btn-run-plan').disabled=true;
+  document.getElementById('btn-stop-plan').disabled=false;
+  const cases=getTestCases(selectedCat,selectedModel);
+  let p=0,w=0,f=0;
+  document.getElementById('pr-p').textContent=0;document.getElementById('pr-w').textContent=0;document.getElementById('pr-f').textContent=0;
+  setAI('🔄 Running test plan...');
+  for(let i=0;i<cases.length;i++){
+    if(planStop)break;
+    const tc=cases[i];
+    const row=document.getElementById('tc-row-'+tc.id);
+    if(row){row.style.background='#e8f2ff';}
+    document.getElementById('plan-status').textContent=`Running ${tc.id} — ${tc.sw}`;
+    document.getElementById('plan-prog').style.width=((i/cases.length)*100)+'%';
+    const resEl=document.getElementById('res-'+tc.id);
+    if(resEl){resEl.innerHTML='<span style="color:#2563eb">RUN</span>';}
+    await sleep(500+Math.random()*300);
+    if(planStop)break;
+    const col={PASS:'#00875a',WARN:'#d97706',FAIL:'#dc2626'};
+    const bg={PASS:'#d4f5e6',WARN:'#fff7e0',FAIL:'#fde8e8'};
+    if(row){row.style.background=bg[tc.res];}
+    if(resEl){resEl.innerHTML=`<span style="font-weight:800;color:${col[tc.res]}">${tc.res}</span>`;}
+    if(tc.res==='PASS')p++;else if(tc.res==='WARN')w++;else f++;
+    document.getElementById('pr-p').textContent=p;document.getElementById('pr-w').textContent=w;document.getElementById('pr-f').textContent=f;
+  }
+  document.getElementById('plan-prog').style.width='100%';
+  document.getElementById('plan-status').textContent=planStop?`Stopped — ${p} PASS ${w} WARN ${f} FAIL`:`✅ Complete — ${p} PASS  ${w} WARN  ${f} FAIL`;
+  document.getElementById('btn-run-plan').disabled=false;
+  document.getElementById('btn-stop-plan').disabled=true;
+  planRunning=false;
+  if(!planStop){
+    const score=Math.round(((p+w*.5)/(p+w+f))*100);
+    setAI(`✅ Test complete! <strong>${p} PASS · ${w} WARN · ${f} FAIL</strong> · Compliance score ${score}%<br>Model: ${selectedModel.model}`,w>0?`⚠️ WARN items should be logged in the test report`:`🎉 All passed!`);
+    toast(`✅ Done: ${p} PASS · ${w} WARN · ${f} FAIL`);
+  }
+}
+function stopTestPlan(){planStop=true;document.getElementById('btn-stop-plan').disabled=true;}
+
+// ── TEST DEFINITIONS (real Sifos 802.3at conformance test IDs) ──
+const TD={
+  // Detection
+  det_v:         {cat:'Detection',      exp:'2.7–10.1V',         meas:'4.81V',              res:'PASS',note:'IEEE Table 33-1'},
+  det_i:         {cat:'Detection',      exp:'5–300μA',           meas:'88μA',               res:'PASS',note:''},
+  det_range:     {cat:'Detection',      exp:'23.75–26.25kΩ',     meas:'24.9kΩ',             res:'PASS',note:'Sig R within range'},
+  det_time:      {cat:'Detection',      exp:'<2s',               meas:'210ms',              res:'PASS',note:''},
+  det_rsource:   {cat:'Detection',      exp:'0–10Ω',             meas:'2.1Ω',               res:'PASS',note:'Source R acceptable'},
+  // Classification
+  class_v:       {cat:'Classification', exp:'14.5–20.5V',        meas:'16.0V',              res:'PASS',note:''},
+  class_time:    {cat:'Classification', exp:'<75ms',             meas:'42ms',               res:'PASS',note:''},
+  class_err:     {cat:'Classification', exp:'Class error reject', meas:'Rejected ✓',         res:'PASS',note:'Invalid class handled'},
+  class_lldp:    {cat:'Classification', exp:'Pclass_LLDP=1',     meas:'Pclass_LLDP=0',      res:'FAIL',note:'⚠ M4350-40X4C: LLDP Power Class returns 0, expected 1 (FW bug v14.0.4.8)'},
+  // Power-On Sequence
+  pwrup_time:    {cat:'Power-On',       exp:'<400ms',            meas:'312ms',              res:'PASS',note:''},
+  pwrup_inrush:  {cat:'Power-On',       exp:'<500mA / 2ms',      meas:'421mA',              res:'PASS',note:''},
+  pwron_v:       {cat:'Power-On',       exp:'44.0–57.0V',        meas:'48.1V',              res:'PASS',note:''},
+  pwron_pwrcap:  {cat:'Power-On',       exp:'≥PD class max',     meas:'30.0W ✓',            res:'PASS',note:'802.3at AT Type-1'},
+  pwron_maxi:    {cat:'Power-On',       exp:'<625mA',            meas:'361mA',              res:'PASS',note:''},
+  pwron_overld:  {cat:'Power-On',       exp:'Overload response',  meas:'Cut within 400ms ✓', res:'PASS',note:''},
+  // MPS
+  mps_dc_valid:  {cat:'MPS',            exp:'DC MPS present',    meas:'7.5mA DC ✓',         res:'PASS',note:''},
+  mps_dc_pwrdn:  {cat:'MPS',            exp:'DC absent → off',   meas:'Power-down ✓',       res:'PASS',note:''},
+  // Power-Down
+  pwrdn_overld:  {cat:'Power-Down',     exp:'Overload → off',    meas:'De-energized ✓',     res:'PASS',note:''},
+  pwrdn_time:    {cat:'Power-Down',     exp:'<75ms',             meas:'58ms',               res:'PASS',note:''},
+  pwrdn_v:       {cat:'Power-Down',     exp:'<1.8V after off',   meas:'0.0V ✓',             res:'PASS',note:''},
+};
+
+const AI_REC_MAP={
+  af: ['det_v','det_i','det_range','det_time','det_rsource','class_v','class_time','class_err','class_lldp','pwrup_time','pwrup_inrush','pwron_v','pwron_pwrcap','pwron_maxi','mps_dc_valid','mps_dc_pwrdn','pwrdn_time','pwrdn_v'],
+  at: ['det_v','det_i','det_range','det_time','det_rsource','class_v','class_time','class_err','class_lldp','pwrup_time','pwrup_inrush','pwron_v','pwron_pwrcap','pwron_maxi','pwron_overld','mps_dc_valid','mps_dc_pwrdn','pwrdn_overld','pwrdn_time','pwrdn_v'],
+  bt3:['det_v','det_i','det_range','det_time','det_rsource','class_v','class_time','class_err','class_lldp','pwrup_time','pwrup_inrush','pwron_v','pwron_pwrcap','pwron_maxi','pwron_overld','mps_dc_valid','mps_dc_pwrdn','pwrdn_overld','pwrdn_time','pwrdn_v'],
+  bt4:['det_v','det_i','det_range','det_time','det_rsource','class_v','class_time','class_err','class_lldp','pwrup_time','pwrup_inrush','pwron_v','pwron_pwrcap','pwron_maxi','pwron_overld','mps_dc_valid','mps_dc_pwrdn','pwrdn_overld','pwrdn_time','pwrdn_v'],
+};
+
+const AI_REC=AI_REC_MAP.at;
+
+const SIFOS_CFG_MAP={
+  af: {type:'AT Type-1 (af compat.)',pairs:'2-Pair',maxGrant:'15.4W',mps:'AC MPS',detCycle:'400ms',classMode:'2-Event Physical',pwrTimeout:'400ms',voltage:'44–57V'},
+  at: {type:'AT Type-2',pairs:'2-Pair',maxGrant:'30.0W',mps:'AC MPS',detCycle:'400ms',classMode:'2-Event Physical',pwrTimeout:'400ms',voltage:'44–57V'},
+  bt3:{type:'BT Type-3',pairs:'4-Pair',maxGrant:'60.0W',mps:'AC MPS',detCycle:'400ms',classMode:'4-Event Physical',pwrTimeout:'400ms',voltage:'50–57V'},
+  bt4:{type:'BT Type-4',pairs:'4-Pair',maxGrant:'99.9W',mps:'AC MPS',detCycle:'400ms',classMode:'4-Event Physical',pwrTimeout:'400ms',voltage:'50–57V'},
+};
+
+const FAULT_DESCS={
+  no_err:'No fault — PSE operating normally, PD powered.',
+  mps_absent:'MPS Absent — PD removed or MPS circuit failure. PSE will power-down port.',
+  short:'Short circuit on port. PSE immediately removes power to protect hardware.',
+  overload:'PD drawing more current than class maximum. PSE cuts power after timeout.',
+  pwr_denied:'Total PoE budget exhausted. Port cannot be powered — add PSU or reduce load.',
+  thermal:'PSE chip thermal shutdown. Reduce load or improve ventilation.',
+  startup_fail:'PD failed power-up handshake. Check cable or PD compliance.',
+  ovlo:'Over-Voltage Lockout — PSU output too high. Check PSU health.',
+  uvlo:'Under-Voltage Lockout — PSU output too low. PSU may be overloaded.',
+};
+
+// ── M4350 SPECS DATA ──
+const M4350_SPECS=[
+  {model:'M4350-24G4XF',  part:'GSM4328',   phase:'1', form:'1U Full',   poe_ports:'24',               poe_type:'802.3at',       poe_tag:'at',  max_port:'32W', budget_base:'648W',   budget_max:'648W',   int_psu:'880W',     psu_bays:'1'},
+  {model:'M4350-48G4XF',  part:'GSM4352',   phase:'1', form:'1U Full',   poe_ports:'48',               poe_type:'802.3at',       poe_tag:'at',  max_port:'32W', budget_base:'236W',   budget_max:'236W',   int_psu:'550W',     psu_bays:'2'},
+  {model:'M4350-44M4X4V', part:'MSM4352',   phase:'1', form:'1U Full',   poe_ports:'44',               poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'194W',   budget_max:'3,314W', int_psu:'550W',     psu_bays:'2'},
+  {model:'M4350-24X4V',   part:'XSM4328CV', phase:'1', form:'1U Full',   poe_ports:'24',               poe_type:'802.3at',       poe_tag:'at',  max_port:'32W', budget_base:'576W',   budget_max:'720W',   int_psu:'880W',     psu_bays:'1'},
+  {model:'M4350-24X8F8V', part:'XSM4340V',  phase:'2', form:'1U Full',   poe_ports:'24',               poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'290W',   budget_max:'1,770W', int_psu:'750W',     psu_bays:'1'},
+  {model:'M4350-36X4V',   part:'XSM4340CV', phase:'2', form:'1U Full',   poe_ports:'36',               poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'280W',   budget_max:'1,760W', int_psu:'750W',     psu_bays:'1'},
+  {model:'M4350-40X4C',   part:'XSM4344C',  phase:'2', form:'1U Full',   poe_ports:'40',               poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'196W',   budget_max:'1,676W', int_psu:'750W',     psu_bays:'1'},
+  {model:'M4350-8M2V',    part:'MSM4310',   phase:'3', form:'1/2-width', poe_ports:'8',                poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'119W',   budget_max:'551W',   int_psu:'APS254W',  psu_bays:'—'},
+  {model:'M4350-24M4X4V', part:'MSM4332',   phase:'3', form:'1U Full',   poe_ports:'24',               poe_type:'802.3bt Type4', poe_tag:'bt4', max_port:'90W', budget_base:'522W',   budget_max:'2,520W', int_psu:'800W',     psu_bays:'2'},
+  {model:'M4350-16M4V',   part:'MSM4320',   phase:'4', form:'1U Full',   poe_ports:'16',poe_type:'802.3bt Type4',poe_tag:'bt4',max_port:'90W',budget_base:'530W',budget_max:'1,130W',int_psu:'800W x2',psu_bays:'2'},
+];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{ buildPorts(); initCharts(); buildSpecs(); initFaultDesc(); initModelDropdown(); initCatList(); initSwModelDropdown(); setTimeout(loadRealResults,800); });
+
+function buildPorts(){
+  const tb=document.getElementById('ptbody');
+  for(let r=1;r<=2;r++){
+    let tr=`<tr><td style="font-size:10px;color:#9aa3b0;padding-right:3px">${r}</td>`;
+    for(let c=1;c<=12;c++){
+      const s=r===1&&c===1;
+      tr+=`<td><div class="pr${s?' sel':''}" onclick="selPort(${r},${c},this)"></div></td>`;
+    }
+    tr+=`<td class="pair-b">2p</td></tr>`;
+    tb.innerHTML+=tr;
+  }
+}
+
+// ── SPECS TABLE ──
+function buildSpecs(filter=''){
+  const tbody=document.getElementById('specs-body');
+  const f=filter.toLowerCase();
+  tbody.innerHTML='';
+  M4350_SPECS.forEach(s=>{
+    const row=[s.model,s.part,s.phase,s.form,s.poe_ports,s.poe_type,s.max_port,s.budget_base,s.budget_max,s.int_psu,s.psu_bays].join(' ').toLowerCase();
+    if(f&&!row.includes(f))return;
+    const tagMap={af:'<span class="pt-af">802.3af</span>',at:'<span class="pt-at">802.3at</span>',bt3:'<span class="pt-bt3">802.3bt Type3</span>',bt4:'<span class="pt-bt4">802.3bt Type4</span>',none:'<span class="pt-none">No PoE</span>'};
+    const noPoe=s.poe_tag==='none';
+    tbody.innerHTML+=`<tr${noPoe?' class="no-poe"':''}>
+      <td style="white-space:nowrap;font-weight:600;color:#6b7280">${s.phase!=='—'?'Phase '+s.phase:'—'}</td>
+      <td style="white-space:nowrap"><strong style="color:${noPoe?'#9aa3b0':'#243046'}">${s.model}</strong></td>
+      <td style="font-family:monospace;font-size:11px;white-space:nowrap">${s.part}</td>
+      <td style="white-space:nowrap">${s.form}</td>
+      <td style="text-align:center;font-weight:700;color:${noPoe?'#c5ccd8':'#243046'};white-space:nowrap">${s.poe_ports}</td>
+      <td style="white-space:nowrap">${tagMap[s.poe_tag]||s.poe_type}</td>
+      <td style="font-weight:700;color:${noPoe?'#c5ccd8':'#00875a'};white-space:nowrap">${s.max_port}</td>
+      <td style="font-family:monospace;white-space:nowrap">${s.budget_base}</td>
+      <td style="font-family:monospace;color:${noPoe?'#c5ccd8':'#0097d6'};font-weight:700;white-space:nowrap">${s.budget_max}</td>
+      <td style="font-family:monospace;white-space:nowrap">${s.int_psu}</td>
+      <td style="text-align:center;white-space:nowrap">${s.psu_bays}</td>
+    </tr>`;
+  });
+}
+function filterSpecs(v){buildSpecs(v);}
+
+// ── FAULT DESC ──
+function initFaultDesc(){
+  const el=document.getElementById('dut-fault');
+  if(!el)return;
+  el.addEventListener('change',function(){
+    const d=document.getElementById('fault-desc');
+    if(d)d.textContent=FAULT_DESCS[this.value]||'';
+  });
+}
+
+// ── IP SELECT ──
+function selIP(el,val){
+  ['ip-opt1','ip-opt2','ip-opt3'].forEach(id=>{
+    const o=document.getElementById(id);o.classList.remove('sel');o.querySelector('.ip-rd').classList.remove('sel');
+  });
+  el.classList.add('sel');el.querySelector('.ip-rd').classList.add('sel');
+  const ci=document.getElementById('ip-custom-val');
+  if(val==='custom'){ci.style.display='block';currentIP=ci.value||'';}
+  else{ci.style.display='none';currentIP=val;}
+  document.getElementById('active-ip').textContent=currentIP||'(enter IP)';
+}
+async function connectPSA(){
+  const ip=currentIP||document.getElementById('ip-custom-val').value;
+  if(!ip){toast('⚠️ Please enter an IP address.');return;}
+  const st=document.getElementById('psa-status');st.style.display='block';st.style.color='#2563eb';st.textContent='Connecting to '+ip+'...';
+  await sleep(900);
+  st.style.color='#00875a';st.textContent='✅ Connected to '+ip;
+  document.getElementById('sb-ip').textContent=ip;
+  document.getElementById('rep-dir')&&(document.getElementById('rep-dir').textContent='...\\Results\\'+ip);
+  toast('✅ PSA connected: '+ip);
+  setAI('✅ Connected to Sifos PSA — <strong>'+ip+'</strong><br><br>Select a port and click AI Auto Discover to begin.');
+}
+
+// ── PORT ──
+function selPort(r,c,el){
+  document.querySelectorAll('.pr').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('hdr-port').textContent=`${r}, ${c}`;
+  document.getElementById('sb-port').textContent=`${r}, ${c}`;
+  toast(`Port ${r},${c} selected`);
+}
+
+// ── RADIO / CB ──
+function selR(gid,el){
+  document.getElementById(gid).querySelectorAll('.ri').forEach(x=>{x.classList.remove('sel');x.querySelector('.rd').classList.remove('sel');});
+  el.classList.add('sel');el.querySelector('.rd').classList.add('sel');
+}
+function selPDCls(el,w){
+  selR('pd-cls-g',el);
+  document.getElementById('pdw').textContent=w;
+  document.getElementById('lval').textContent=w;
+  document.getElementById('lslider').value=w;
+}
+function toggleCb(el){const b=el.querySelector('.cb');b.classList.toggle('chk');b.textContent=b.classList.contains('chk')?'✓':'';}
+function tgl(el){const b=el.querySelector('.cb');b.classList.toggle('chk');b.textContent=b.classList.contains('chk')?'✓':'';}
+function upLoad(v){document.getElementById('lval').textContent=parseFloat(v).toFixed(1);}
+
+// ── TAB ──
+function stab(id,el){
+  document.querySelectorAll('.tp').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── AI MSG ──
+function setAI(msg,ins){
+  document.getElementById('ai-msg').innerHTML=msg;
+  const b=document.getElementById('ai-ins');
+  if(ins){b.innerHTML=ins;b.classList.add('show');}else{b.classList.remove('show');}
+}
+function toast(m){
+  if(autoDemoRunning)return;  // 不在 demo 模式顯示 toast，避免擋畫面
+  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+function showModal(icon,title,msg,btnCls='ok'){
+  document.getElementById('cmodal-icon').textContent=icon;
+  document.getElementById('cmodal-title').textContent=title;
+  document.getElementById('cmodal-msg').innerHTML=msg;
+  const btn=document.getElementById('cmodal-btn');btn.className='cmodal-close '+btnCls;
+  document.getElementById('cmodal-ov').classList.add('show');
+}
+function closeModal(){document.getElementById('cmodal-ov').classList.remove('show');}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function animBar(fid,vid,target){
+  const f=document.getElementById(fid),v=document.getElementById(vid);
+  for(let i=0;i<=30;i++){const c=Math.round((target/30)*i);f.style.width=c+'%';v.textContent=c+'%';await sleep(28);}
+}
+async function animNum(id,target,dec){
+  const el=document.getElementById(id);
+  for(let i=0;i<=20;i++){el.textContent=((target/20)*i).toFixed(dec);await sleep(35);}
+  el.textContent=target.toFixed(dec);
+}
+
+// ── DETECTION TYPE (with legacy modal) ──
+function selDetType(el,val){
+  if(val==='legacy'){
+    showLegacyModal();
+    return;
+  }
+  selR('det-type-g',el);
+  document.getElementById('dettype-val').textContent=val;
+}
+function showLegacyModal(){
+  document.getElementById('legacy-modal').classList.add('show');
+  let cnt=5;
+  document.getElementById('legacy-cnt').textContent='Auto-reverting in '+cnt+'s...';
+  legacyTimer=setInterval(()=>{
+    cnt--;
+    if(cnt<=0){closeLegacyModal();clearInterval(legacyTimer);}
+    else{document.getElementById('legacy-cnt').textContent='Auto-reverting in '+cnt+'s...';}
+  },1000);
+}
+function closeLegacyModal(){
+  document.getElementById('legacy-modal').classList.remove('show');
+  clearInterval(legacyTimer);
+  // revert to first option (4ptdot3af)
+  const g=document.getElementById('det-type-g');
+  const opts=g.querySelectorAll('.ri');
+  opts.forEach(x=>{x.classList.remove('sel');x.querySelector('.rd').classList.remove('sel');});
+  opts[0].classList.add('sel');opts[0].querySelector('.rd').classList.add('sel');
+  document.getElementById('dettype-val').textContent='4ptdot3af';
+}
+
+// ── SWITCH TYPE ──
+const SW_TYPE_INFO={
+  af:'<strong>802.3af selected</strong><br>2-pair · Max 15.4W/port · Class 0–3 · af Detection',
+  at:'<strong>802.3at selected</strong><br>2-pair · Max 30W/port · Class 0–4 · af+at Detection',
+  bt3:'<strong>802.3bt Type3 selected</strong><br>4-pair · Max 60W/port · Class 0–6 · 4-event Classification',
+  bt4:'<strong>802.3bt Type4 selected</strong><br>4-pair · Max 90W/port · Class 0–8 · 4-event Classification',
+};
+function selSwType(el,type){
+  selR('sw-type-g',el);
+  currentSwType=type;
+  document.getElementById('swtype-info').innerHTML=SW_TYPE_INFO[type];
+  // update threshold max
+  const maxW={af:15,at:30,bt3:60,bt4:90};
+  document.getElementById('dut-threshold').max=maxW[type];
+  if(parseInt(document.getElementById('dut-threshold').value)>maxW[type]){
+    document.getElementById('dut-threshold').value=maxW[type];
+  }
+}
+
+// ── TRAP ──
+function setTrap(enabled){
+  trapEnabled=enabled;
+  if(enabled){
+    addTrapLog('INFO','PoE trap enabled on port 1,1');
+  } else {
+    addTrapLog('WARN','PoE trap disabled — events will not be reported via SNMP');
+  }
+}
+function addTrapLog(level,msg){
+  const log=document.getElementById('trap-log');
+  const now=new Date();
+  const ts=now.toTimeString().split(' ')[0];
+  const entry=document.createElement('div');
+  entry.innerHTML=`<span class="tl-ts">[${ts}]</span> <span class="${level==='WARN'?'tl-warn':''}">${level}: ${msg}</span>`;
+  // replace placeholder
+  if(log.querySelector('span[style]')){log.innerHTML='';}
+  log.appendChild(entry);
+  log.scrollTop=log.scrollHeight;
+}
+function fireTrap(event){
+  if(!trapEnabled)return;
+  const msgs={
+    powerOn:'pethPsePortOnOffNotification: Port 1,1 — PD Powered ON',
+    powerOff:'pethPsePortOnOffNotification: Port 1,1 — PD Powered OFF / MPS Absent',
+    threshold:'pethPsePortPowerMaintenanceStatus: Port 1,1 — Threshold exceeded',
+    overload:'pethMainPowerUsageOnNotification: Port 1,1 — Overload detected',
+  };
+  if(msgs[event])addTrapLog('TRAP',msgs[event]);
+}
+
+// ── WIZARD ──
+function showWizStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('wp'+i).classList.toggle('active',i===n);
+    const ws=document.getElementById('ws'+i);
+    ws.classList.toggle('active',i===n);
+    ws.classList.toggle('done',i<n);
+  });
+  wizCurrentStep=n;
+}
+
+async function wizStep2(){
+  showWizStep(2);
+  document.getElementById('sifos-ai-loading').style.display='flex';
+  document.getElementById('sifos-ai-result').style.display='none';
+  document.getElementById('btn-to-step3').disabled=true;
+  setAI('🤖 AI computing optimal Sifos configuration based on DUT settings...');
+  await sleep(1800);
+
+  const cfg=SIFOS_CFG_MAP[currentSwType];
+  const recs=AI_REC_MAP[currentSwType];
+  const rows=[
+    ['PSE Type',cfg.type,'✅ Auto-detected'],
+    ['Powered Pairs',cfg.pairs,'✅ Per standard'],
+    ['Max Power Grant',cfg.maxGrant,'✅ IEEE max'],
+    ['MPS Method',cfg.mps,'✅ Recommended'],
+    ['Detection Cycle',cfg.detCycle,'✅ IEEE limit'],
+    ['Classification Mode',cfg.classMode,'✅ Auto-set'],
+    ['Power-Up Timeout',cfg.pwrTimeout,'✅ IEEE limit'],
+    ['Port Voltage Range',cfg.voltage,'✅ Auto-set'],
+  ];
+  const cfgDiv=document.getElementById('sifos-cfg-rows');
+  cfgDiv.innerHTML=rows.map(([k,v,ai])=>`<div class="sifos-cfg-row"><span class="scr-k">${k}</span><span class="scr-v">${v}</span><span class="scr-ai">${ai}</span></div>`).join('');
+
+  const typeNames={af:'802.3af',at:'802.3at',bt3:'802.3bt Type3',bt4:'802.3bt Type4'};
+  document.getElementById('sifos-ai-banner').textContent=`🤖 AI Configuration Complete — ${typeNames[currentSwType]} · ${recs.length} tests selected`;
+
+  const testListEl=document.getElementById('step2-test-list');
+  const catGroups={};
+  recs.forEach(id=>{const d=TD[id];if(d){if(!catGroups[d.cat])catGroups[d.cat]=[];catGroups[d.cat].push(id);}});
+  let html='';
+  Object.entries(catGroups).forEach(([cat,ids])=>{
+    html+=`<div style="font-size:10px;font-weight:700;color:#00875a;margin:6px 0 2px;text-transform:uppercase">${cat} (${ids.length})</div>`;
+    ids.forEach(id=>{html+=`<div style="font-size:11px;color:#374151;padding:1px 6px;font-family:monospace">✓ ${id}</div>`;});
+  });
+  testListEl.innerHTML=html;
+  document.getElementById('step2-test-summary').innerHTML=
+    `<div class="al al-a" style="font-size:11px">🤖 AI selected <strong>${recs.length}</strong> tests<br>Coverage: Detection · Classification · Power Mgmt · Fault Detection</div>`;
+
+  document.getElementById('sifos-ai-loading').style.display='none';
+  document.getElementById('sifos-ai-result').style.display='block';
+  document.getElementById('btn-to-step3').disabled=false;
+  setAI(`✅ Sifos configuration complete! Type: <strong>${typeNames[currentSwType]}</strong>, ${recs.length} tests selected.`,`⚡ Click "Execute Tests →" to begin`);
+  toast('✅ AI configured Sifos for '+typeNames[currentSwType]);
+}
+
+function wizStep3(){
+  showWizStep(3);
+  // Apply AI recommended tests
+  const recs=AI_REC_MAP[currentSwType];
+  uncheckAll();
+  recs.forEach(id=>{
+    const el=document.getElementById('t-'+id);if(!el)return;
+    el.classList.add('air');
+    const b=el.querySelector('.cb');b.classList.add('chk','air');b.textContent='✓';
+  });
+  // Show DUT summary
+  const threshold=document.getElementById('dut-threshold').value;
+  const fault=document.getElementById('dut-fault');
+  const faultTxt=fault.options[fault.selectedIndex].text;
+  const typeNames={af:'802.3af',at:'802.3at',bt3:'802.3bt Type3',bt4:'802.3bt Type4'};
+  document.getElementById('step3-dut-summary').innerHTML=
+    `Type: <strong>${typeNames[currentSwType]}</strong><br>Threshold: <strong>${threshold}W</strong><br>Fault: <strong>${faultTxt}</strong><br>Trap: <strong>${trapEnabled?'Enabled':'Disabled'}</strong>`;
+  setAI(`🚀 Ready to run <strong>${recs.length}</strong> tests!<br>DUT: M4350 · Type: ${typeNames[currentSwType]}`,`▶ Click Sequence Tests to begin`);
+}
+
+function wizBack(){showWizStep(1);}
+function wizBack2(){showWizStep(2);}
+
+// ── AUTO DISCOVER ──
+async function autoDiscover(){
+  document.getElementById('btn-disc').disabled=true;
+  document.getElementById('disc-prog').style.display='block';
+  document.getElementById('pse-det').style.display='none';
+  setAI('🔍 Sifos scanning PSE electrical characteristics...');
+  const steps=[
+    ['Initializing scan port...',10],['Applying detection signal...',25],
+    ['Measuring signature resistance...',45],['Classifying IEEE standard...',65],
+    ['AI fingerprint matching...',82],['Generating confidence report...',95],['Detection complete.',100],
+  ];
+  for(const [msg,pct] of steps){
+    document.getElementById('scan-msg').textContent=msg;
+    document.getElementById('scan-bar').style.width=pct+'%';
+    await sleep(400);
+  }
+  await sleep(250);
+  document.getElementById('disc-prog').style.display='none';
+  document.getElementById('pse-det').style.display='block';
+  animBar('cf1','cv1',97);animBar('cf2','cv2',99);await sleep(100);animBar('cf3','cv3',94);
+  document.getElementById('cur-pse').textContent='M4350 Port 1';
+  document.getElementById('pse-info').innerHTML=
+    '<strong>Standard:</strong> IEEE 802.3at (AT Type-1)<br>'+
+    '<strong>Pairs:</strong> 2-Pair · ALT A · MDI-X<br>'+
+    '<strong>Sig R:</strong> 24.9 kΩ · <strong>MPS:</strong> AC<br>'+
+    '<strong>FW:</strong> v14.0.6.8';
+  document.getElementById('sb-pse').textContent='Type-1, 2-Pair';
+  document.getElementById('sb-a').textContent='48.1V';
+  document.getElementById('sb-lan').textContent='OK';
+  document.getElementById('ai-det').innerHTML=
+    '<span class="tag tg">DETECTED</span><br><br>'+
+    '<strong>Standard:</strong> IEEE 802.3at<br>'+
+    '<strong>Type:</strong> AT Type-1 · 2-Pair<br>'+
+    '<strong>Sig R:</strong> 24.9kΩ · <strong>MPS:</strong> AC<br>'+
+    '<strong>Max Grant:</strong> NONE · <strong>FW:</strong> v14.0.6.8';
+  setAI(
+    '✅ PSE detection complete!<br><br><strong>Type:</strong> IEEE 802.3at (AT Type-1)<br><strong>Pairs:</strong> 2-Pair · MDI-X · AC MPS<br><br>AI Recommendation: Switch to Conf. Test for full compliance testing.',
+    '🎯 Identified M4350 v14.0.6.8 firmware. Threshold_power boundary tests added (M4350-96).'
+  );
+  document.getElementById('btn-disc').disabled=false;
+  toast('✅ PSE: AT Type-1, 2-Pair — 94% confidence');
+}
+
+// ── CONNECT PD ──
+async function connectPD(){
+  document.getElementById('btn-con').disabled=true;
+  document.getElementById('pd-stxt').textContent='Connecting...';
+  document.getElementById('pu-status').textContent='Applying detection signal...';
+  setAI('🔌 Connecting PD, waiting for PSE power-up...');
+  await sleep(900);
+  pdConnected=true;
+  document.getElementById('pd-dot').classList.add('on');
+  document.getElementById('pd-stxt').textContent='PD Connected – Powered';
+  document.getElementById('pd-stxt').style.color='#00875a';
+  document.getElementById('btn-dis').disabled=false;
+  document.getElementById('pd-met').style.display='block';
+  document.getElementById('sb-a').textContent='48.1V';document.getElementById('sb-b').textContent='0V';
+  document.getElementById('sb-lan').textContent='OK';
+  document.getElementById('pu-status').textContent='Powered – 48.1V / 284mA / 13.7W';
+  animNum('mv',48.1,1);animNum('mc',284,0);await sleep(300);animNum('mp',13.7,1);
+  setTimeout(()=>{
+    document.getElementById('ai-pwr').innerHTML='🤖 <strong>AI Analysis:</strong> Normal startup. V=48.1V, I=284mA, P=13.7W. IEEE 802.3at Class 0 compliant. No anomalies.';
+    document.getElementById('ai-pwr').className='al al-s';
+  },800);
+  document.getElementById('wave-ph').style.display='none';
+  document.getElementById('wave-chart').style.display='block';
+  startWave();
+  fireTrap('powerOn');
+  setAI('✅ PD connected and powered. V: <strong>48.1V</strong> · I: <strong>284mA</strong> · P: <strong>13.7W</strong><br><br>Status: <span style="color:#00875a;font-weight:700">Normal</span>','💡 Switch to Conf. Test for full compliance testing.');
+  toast('✅ PD Connected – 13.7W @ 48.1V');
+}
+async function disconnectPD(){
+  pdConnected=false;clearInterval(waveIv);
+  document.getElementById('pd-dot').classList.remove('on');
+  document.getElementById('pd-stxt').textContent='PD Disconnected';
+  document.getElementById('pd-stxt').style.color='#6b7280';
+  document.getElementById('btn-con').disabled=false;document.getElementById('btn-dis').disabled=true;
+  document.getElementById('pd-met').style.display='none';
+  document.getElementById('wave-ph').style.display='flex';document.getElementById('wave-chart').style.display='none';
+  document.getElementById('sb-a').textContent='--';document.getElementById('sb-b').textContent='--';
+  document.getElementById('pu-status').textContent='Idle';
+  fireTrap('powerOff');
+  setAI('PD disconnected. PSE port stopped powering.');toast('PD Disconnected');
+}
+
+function startWave(){
+  if(waveChart){waveChart.destroy();waveChart=null;}
+  const ctx=document.getElementById('wave-chart').getContext('2d');
+  const labels=[],vd=[],cd=[];let t=0;
+  for(let i=0;i<30;i++){
+    labels.push(i*10+'ms');
+    vd.push(i<8?(i/8)*48.1:(48.1+(Math.random()-.5)*.4));
+    cd.push(i<8?(i/8)*284:(284+(Math.random()-.5)*6));t=i*10;
+  }
+  waveChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'Voltage (V)',data:vd,borderColor:'#00c47c',backgroundColor:'#00c47c15',tension:.3,borderWidth:2,pointRadius:0,yAxisID:'y1'},
+    {label:'Current (mA)',data:cd,borderColor:'#0097d6',backgroundColor:'#0097d610',tension:.3,borderWidth:1.5,pointRadius:0,yAxisID:'y2'},
+  ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+    plugins:{legend:{labels:{color:'#6b7280',font:{size:10}}}},
+    scales:{
+      x:{ticks:{color:'#9aa3b0',font:{size:9}},grid:{color:'#e2e7ef'}},
+      y1:{type:'linear',position:'left',ticks:{color:'#00875a',font:{size:9}},grid:{color:'#e2e7ef'},title:{display:true,text:'V',color:'#00875a',font:{size:9}}},
+      y2:{type:'linear',position:'right',ticks:{color:'#0097d6',font:{size:9}},grid:{display:false},title:{display:true,text:'mA',color:'#0097d6',font:{size:9}}},
+    }}});
+  waveIv=setInterval(()=>{
+    if(!pdConnected)return;
+    t+=50;
+    waveChart.data.labels.push(t+'ms');
+    waveChart.data.datasets[0].data.push(+(48.1+(Math.random()-.5)*.35).toFixed(2));
+    waveChart.data.datasets[1].data.push(+(284+(Math.random()-.5)*7).toFixed(1));
+    if(waveChart.data.labels.length>40){waveChart.data.labels.shift();waveChart.data.datasets[0].data.shift();waveChart.data.datasets[1].data.shift();}
+    waveChart.update('none');
+  },500);
+}
+
+// ── CONF TEST ──
+function checkAll(){document.querySelectorAll('[id^="t-"] .cb').forEach(b=>{b.classList.add('chk');b.textContent='✓';});}
+function uncheckAll(){
+  document.querySelectorAll('[id^="t-"] .cb').forEach(b=>{b.classList.remove('chk','air');b.textContent='';});
+  document.querySelectorAll('[id^="t-"]').forEach(x=>x.classList.remove('air','pass','warn','fail','run'));
+}
+function aiRec(){
+  uncheckAll();
+  const recs=AI_REC_MAP[currentSwType]||AI_REC_MAP.at;
+  recs.forEach(id=>{
+    const el=document.getElementById('t-'+id);if(!el)return;
+    el.classList.add('air');
+    const b=el.querySelector('.cb');b.classList.add('chk','air');b.textContent='✓';
+  });
+  setAI('🤖 AI selected <strong>'+recs.length+' recommended</strong> tests.<br><br>Coverage: Detection · Power Management · Fault Detection','⚡ Est. ~50 seconds');
+  toast('🤖 AI selected '+recs.length+' tests');
+}
+function getSel(){return[...document.querySelectorAll('[id^="t-"]')].filter(e=>e.querySelector('.cb').classList.contains('chk')).map(e=>e.id.replace('t-',''));}
+
+async function seqTests(){
+  if(testsRunning)return;
+  const tests=getSel();
+  if(!tests.length){toast('⚠️ Select tests first.');return;}
+  testsRunning=true;
+  document.getElementById('btn-seq').disabled=true;document.getElementById('btn-stop').disabled=false;
+  document.getElementById('rtcard').style.display='block';document.getElementById('rtbody').innerHTML='';
+  let p=0,w=0,f=0;
+  document.getElementById('r-p').textContent=0;document.getElementById('r-w').textContent=0;document.getElementById('r-f').textContent=0;
+  setAI('🔄 Running test sequence...');
+  for(let i=0;i<tests.length;i++){
+    if(!testsRunning)break;
+    const id=tests[i],def=TD[id]||{cat:'Other',exp:'N/A',meas:'N/A',res:'PASS',note:''};
+    const el=document.getElementById('t-'+id);
+    el.classList.remove('air');el.classList.add('run');
+    el.querySelector('.cbs').innerHTML='<span class="sr">RUN</span>';
+    document.getElementById('conf-st').textContent=`Running: ${id} (${i+1}/${tests.length})`;
+    document.getElementById('tprog').style.width=((i/tests.length)*100)+'%';
+    document.getElementById('tcnt').textContent=`${i} / ${tests.length}`;
+    await sleep(380+Math.random()*180);
+    if(!testsRunning)break;
+    el.classList.remove('run');
+    const res=def.res;
+    if(res==='PASS'){el.classList.add('pass');el.querySelector('.cbs').innerHTML='<span class="sp">PASS</span>';p++;}
+    else if(res==='WARN'){el.classList.add('warn');el.querySelector('.cbs').innerHTML='<span class="sw">WARN</span>';w++;}
+    else{el.classList.add('fail');el.querySelector('.cbs').innerHTML='<span class="sf">FAIL</span>';f++;}
+    addRow(id,def,res);
+    document.getElementById('r-p').textContent=p;document.getElementById('r-w').textContent=w;document.getElementById('r-f').textContent=f;
+    if(id==='fault_overload')fireTrap('overload');
+    if(id==='threshold_power')fireTrap('threshold');
+  }
+  const total=p+w+f;
+  document.getElementById('tprog').style.width='100%';
+  document.getElementById('tcnt').textContent=`${total} / ${tests.length} complete`;
+  document.getElementById('conf-st').textContent=`✅ Done — ${p} PASS  ${w} WARN  ${f} FAIL`;
+  document.getElementById('btn-seq').disabled=false;document.getElementById('btn-stop').disabled=true;
+  testsRunning=false;
+  const score=Math.round(((p+w*.5)/total)*100);
+  buildAIReport(p,w,f,total,score);
+  toast(`✅ Done: ${p} PASS · ${w} WARN · ${f} FAIL`);
+}
+function stopTests(){testsRunning=false;document.getElementById('btn-stop').disabled=true;document.getElementById('btn-seq').disabled=false;document.getElementById('conf-st').textContent='Stopped.';setAI('⏹ Tests stopped.');}
+function addRow(id,def,res){
+  const col={PASS:'#00875a',WARN:'#d97706',FAIL:'#dc2626'};
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="color:#374151">${id}</td><td><span class="tag tn">${def.cat}</span></td><td style="color:#9aa3b0">${def.exp}</td><td style="color:#243046">${def.meas}</td><td style="color:${col[res]};font-weight:800">${res}</td><td style="color:#d97706;font-size:10px">${def.note}</td>`;
+  document.getElementById('rtbody').appendChild(tr);
+}
+
+// ── AI INSIGHTS ──
+function buildAIReport(p,w,f,total,score){
+  const ring=document.getElementById('score-ring');
+  document.getElementById('score-val').textContent=score+'%';
+  if(score>=90){ring.style.borderTopColor='#00c47c';ring.style.borderRightColor='#00c47c';ring.style.borderBottomColor='#00c47c';}
+  else if(score>=70){ring.style.borderTopColor='#f59e0b';ring.style.borderRightColor='#f59e0b';ring.style.borderBottomColor='#e2e7ef';}
+  else{ring.style.borderTopColor='#dc2626';ring.style.borderRightColor='#e2e7ef';ring.style.borderBottomColor='#e2e7ef';}
+  document.getElementById('score-lbl').textContent=score>=90?'✅ Compliant':score>=70?'⚠️ Needs Review':'❌ Non-Compliant';
+  document.getElementById('ai-anom').innerHTML=w>0
+    ?'<div class="al al-w" style="font-size:11px">⚠️ <strong>threshold_power:</strong> Consumed Power exceeded Threshold Power. Matches known issue <strong>M4350-96</strong> (SW allows power when Total Power Available is not exceeded). Recommend logging as Known Issue.</div>'
+    :'<div class="al al-s" style="font-size:11px">✅ No anomalies detected.</div>';
+  document.getElementById('ai-rpt').innerHTML=`
+<div class="al al-a" style="margin-bottom:9px;font-size:11px">🤖 <strong>AI Auto-Generated Test Report</strong> — M4350-24X8F8V v14.0.6.8 PoE Compliance Test</div>
+<strong>Summary:</strong> ${total} total — <span style="color:#00875a;font-weight:700">${p} PASS</span> / <span style="color:#d97706;font-weight:700">${w} WARN</span> / <span style="color:#dc2626;font-weight:700">${f} FAIL</span>. Overall compliance score: <strong style="color:#00875a">${score}%</strong><br><br>
+<strong>Key Findings:</strong><br>
+• Detection &amp; Classification fully compliant with IEEE 802.3at ✅<br>
+• Power Management Dynamic/Static verified ✅<br>
+${w>0?'• <span style="color:#d97706">threshold_power [WARN]: M4350-96 known behavior</span><br>':''}
+• Fault Detection: All triggers verified ✅<br><br>
+<strong>Recommendation:</strong> Log threshold_power in Release Notes (M4350-96)`;
+  document.getElementById('ai-rpt-act').style.display='flex';
+  setAI(`✅ Test complete! Compliance score: <strong>${score}%</strong><br><br>`+(w>0?'⚠️ threshold_power WARN — M4350-96 known behavior':'All tests passed!'),'📊 AI report generated. Check AI Insights.');
+}
+
+// ── LOAD REAL RESULTS (pre-populate AI Insights with actual test data) ──
+function loadRealResults(){
+  // Real data: Sifos 802.3at Conformance Test, M4350 v14.0.4.8, 2025-02-03
+  // 125 PASS / 2 FAIL across 4 DUTs, Sifos Interop Index = 97.34%
+  const ring=document.getElementById('score-ring');
+  const scoreVal=document.getElementById('score-val');
+  const scoreLbl=document.getElementById('score-lbl');
+  if(!ring)return;
+  ring.classList.add('animate');
+  ring.style.borderColor='#e2e7ef';
+  ring.style.borderTopColor='#00c47c';
+  ring.style.borderRightColor='#00c47c';
+  ring.style.borderBottomColor='#00c47c';
+  let n=0;const target=97;
+  const iv=setInterval(()=>{n=Math.min(n+3,target);scoreVal.textContent=n+'%';if(n>=target){clearInterval(iv);scoreVal.textContent='97.34%';}},30);
+  scoreLbl.innerHTML='<span style="color:#00875a;font-weight:700">✅ Compliant</span> · Sifos Interop Index';
+
+  document.getElementById('ai-det').innerHTML=
+    '<span class="tag tg">DETECTED · 4 DUTs</span><br><br>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:6px">'+
+    '<tr style="border-bottom:1px solid #e2e7ef"><td style="color:#9aa3b0;padding:3px 4px">Standard</td><td style="font-weight:700;color:#243046">IEEE 802.3at (AT Type-1)</td></tr>'+
+    '<tr style="border-bottom:1px solid #e2e7ef"><td style="color:#9aa3b0;padding:3px 4px">Sig R</td><td style="font-weight:700;color:#243046">24.9 kΩ · 2-Pair ALT A</td></tr>'+
+    '<tr style="border-bottom:1px solid #e2e7ef"><td style="color:#9aa3b0;padding:3px 4px">MPS</td><td style="font-weight:700;color:#243046">AC MPS · 7.5mA DC</td></tr>'+
+    '<tr style="border-bottom:1px solid #e2e7ef"><td style="color:#9aa3b0;padding:3px 4px">Voltage</td><td style="font-weight:700;color:#243046">48.1V</td></tr>'+
+    '<tr><td style="color:#9aa3b0;padding:3px 4px">PSA</td><td style="font-weight:700;color:#243046">v5.4.11 · 10.10.0.12</td></tr>'+
+    '</table>';
+
+  document.getElementById('ai-anom').innerHTML=
+    '<div class="al al-w" style="font-size:11px;margin-bottom:8px">'+
+    '🔴 <strong>FAIL — class_lldp [M4350-40X4C]</strong><br>'+
+    'Ports 3-2 and 4-2: <code style="background:#f0f2f6;padding:1px 4px;border-radius:3px">Pclass_LLDP_22.7 = 0</code> (expected 1)<br>'+
+    '<code style="background:#f0f2f6;padding:1px 4px;border-radius:3px">Pclass_LLDP_24.5 = 0</code> (expected 1)<br>'+
+    '<span style="color:#dc2626;font-weight:700">Root cause: LLDP Power Class negotiation bug in FW v14.0.4.8</span></div>'+
+    '<div class="al al-i" style="font-size:11px">'+
+    '🤖 AI Impact Analysis: This failure affects LLDP-based power negotiation. PDs relying on LLDP for class advertisement may receive insufficient power budget. Recommend FW patch or workaround: use PHY-only power grant mode.</div>';
+
+  document.getElementById('ai-rpt').innerHTML=
+    '<div class="al al-a" style="margin-bottom:9px;font-size:11px">🤖 <strong>AI Auto-Generated Report</strong> — Sifos 802.3at Conformance · M4350 v14.0.4.8 · 2025-02-03</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">'+
+    '<div style="text-align:center;background:#f0faf5;border:1px solid #b3e8d0;border-radius:6px;padding:8px">'+
+    '<div style="font-size:22px;font-weight:800;color:#00875a">97.34%</div><div style="font-size:10px;color:#9aa3b0">Interop Index</div></div>'+
+    '<div style="text-align:center;background:#d4f5e6;border:1px solid #6ee7b7;border-radius:6px;padding:8px">'+
+    '<div style="font-size:22px;font-weight:800;color:#065f46">125</div><div style="font-size:10px;color:#065f46">PASS</div></div>'+
+    '<div style="text-align:center;background:#fde8e8;border:1px solid #fca5a5;border-radius:6px;padding:8px">'+
+    '<div style="font-size:22px;font-weight:800;color:#dc2626">2</div><div style="font-size:10px;color:#dc2626">FAIL</div></div>'+
+    '<div style="text-align:center;background:#f7f9fc;border:1px solid #dde1ea;border-radius:6px;padding:8px">'+
+    '<div style="font-size:22px;font-weight:800;color:#243046">4</div><div style="font-size:10px;color:#9aa3b0">DUTs Tested</div></div>'+
+    '</div>'+
+    '<strong>DUTs:</strong> M4350-44M4X4V (P1/48) · M4350-24X8F8V (P1/24) · M4350-24G4XF (P1/24) · M4350-40X4C (P1/40)<br><br>'+
+    '<strong>Findings:</strong><br>'+
+    '✅ <span style="color:#00875a">Detection &amp; Classification — PASS</span> (all DUTs)<br>'+
+    '✅ <span style="color:#00875a">Power-On/Off Sequence — PASS</span> (all DUTs)<br>'+
+    '✅ <span style="color:#00875a">MPS DC Valid/Power-Down — PASS</span> (all DUTs)<br>'+
+    '❌ <span style="color:#dc2626">class_lldp — FAIL on M4350-40X4C</span> Port 3-2, 4-2 · LLDP Power Class = 0 (expected 1)<br><br>'+
+    '<strong>Recommendation:</strong> File FW bug report for M4350-40X4C v14.0.4.8 LLDP Power Class negotiation. Workaround: configure Max Power Grant = PHY (not LLDP/PHY+LLDP) until patch released.';
+  document.getElementById('ai-rpt-act').style.display='flex';
+}
+
+// ── CONF DUT SELECTOR ──
+function onConfDutChange(){
+  const v=document.getElementById('conf-dut-sel').value;
+  const lldpEl=document.getElementById('t-class_lldp');
+  if(!lldpEl)return;
+  if(v==='40X4C'){
+    lldpEl.classList.add('real-fail');
+    lldpEl.querySelector('.cbs').innerHTML='<span class="sf">FAIL</span>';
+  } else if(v==='all'){
+    lldpEl.classList.remove('real-fail','pass');
+    lldpEl.querySelector('.cbs').innerHTML='<span style="font-size:9px;color:#dc2626">2/4 FAIL</span>';
+  } else {
+    lldpEl.classList.remove('real-fail');lldpEl.classList.add('real-pass');
+    lldpEl.querySelector('.cbs').innerHTML='<span class="sp">PASS</span>';
+  }
+}
+
+// ── AUTO DEMO (human-paced, stoppable) ──
+
+function humanPause(base,jitter=200){return sleep(base+Math.random()*jitter);}
+function scrollTo(el){if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+
+function toggleAutoDemo(){
+  if(autoDemoRunning){
+    // STOP
+    autoDemoRunning=false;
+    const btn=document.getElementById('btn-auto-demo');
+    btn.textContent='▶ Auto Demo';
+    btn.style.background='';
+  } else {
+    autoDemo();
+  }
+}
+
+function setDemoBtn(running){
+  const btn=document.getElementById('btn-auto-demo');
+  if(!btn)return;
+  if(running){
+    btn.textContent='⏹ Stop Demo';
+    btn.style.background='linear-gradient(135deg,#dc2626,#b91c1c)';
+    btn.style.animation='none';
+  } else {
+    btn.textContent='▶ Auto Demo';
+    btn.style.background='';
+    btn.style.animation='';
+  }
+}
+
+async function autoDemo(){
+  if(autoDemoRunning)return;
+  autoDemoRunning=true;
+  setDemoBtn(true);
+
+  const ab=()=>!autoDemoRunning;
+  const tabs=document.querySelectorAll('.tb');  // all 6 tabs in DOM order
+
+  // ══════════════════════════════════════
+  // TAB 1 — M4350 Specs
+  // ══════════════════════════════════════
+  stab('specs',tabs[0]);
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Scroll through the specs table slowly
+  const specsTbl=document.getElementById('specs-tbl');
+  if(specsTbl)scrollTo(specsTbl);
+  await humanPause(1500,400); if(ab()){setDemoBtn(false);return;}
+
+  // Simulate typing in search: "M4350-40"
+  const searchEl=document.getElementById('specs-search');
+  if(searchEl){
+    scrollTo(searchEl);
+    await humanPause(700,200); if(ab()){setDemoBtn(false);return;}
+    for(const ch of 'M4350-40'){
+      if(ab()){setDemoBtn(false);return;}
+      searchEl.value+=ch; filterSpecs(searchEl.value);
+      await sleep(110+Math.random()*80);
+    }
+    await humanPause(1600,400); if(ab()){setDemoBtn(false);return;}
+    // Clear search
+    searchEl.value=''; filterSpecs('');
+    await humanPause(600,200); if(ab()){setDemoBtn(false);return;}
+  }
+
+  // ══════════════════════════════════════
+  // TAB 2 — Sifos PSE Config
+  // ══════════════════════════════════════
+  stab('pse',tabs[1]);
+  await humanPause(900,300); if(ab()){setDemoBtn(false);return;}
+
+  const ipPanel=document.getElementById('ip-opt1');
+  if(ipPanel)scrollTo(ipPanel);
+  await humanPause(800,200); if(ab()){setDemoBtn(false);return;}
+
+  document.getElementById('active-ip').textContent='10.10.0.12';
+  const st=document.getElementById('psa-status');
+  st.style.display='block';st.style.color='#2563eb';st.textContent='Connecting to 10.10.0.12...';
+  await humanPause(1800,400); if(ab()){setDemoBtn(false);return;}
+  st.style.color='#00875a';st.textContent='✅ Connected to 10.10.0.12';
+  document.getElementById('sb-ip').textContent='10.10.0.12';
+  setAI('✅ Connected to Sifos PSA — <strong>10.10.0.12</strong><br><br>Discovering PSE characteristics...');
+  scrollTo(st);
+  await humanPause(1800,400); if(ab()){setDemoBtn(false);return;}
+
+  // AI Auto Discover
+  scrollTo(document.getElementById('btn-disc'));
+  await humanPause(700,200); if(ab()){setDemoBtn(false);return;}
+  await autoDiscover();
+  if(ab()){setDemoBtn(false);return;}
+  const pseDetEl=document.getElementById('pse-det');
+  if(pseDetEl)scrollTo(pseDetEl);
+  await humanPause(2200,500); if(ab()){setDemoBtn(false);return;}
+
+  // ══════════════════════════════════════
+  // TAB 3 — M4350 Test
+  // ══════════════════════════════════════
+  stab('swtest',tabs[2]);
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Select model M4350-40X4C
+  const swSel=document.getElementById('sw-model-sel');
+  scrollTo(swSel);
+  await humanPause(900,200); if(ab()){setDemoBtn(false);return;}
+  // Find the M4350-40X4C option
+  const targetOpt=[...swSel.options].find(o=>o.value.includes('40X4C'));
+  if(targetOpt){ swSel.value=targetOpt.value; onSwModelChange(); }
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Scroll to model info bar
+  const swInfo=document.getElementById('sw-model-info');
+  if(swInfo)scrollTo(swInfo);
+  await humanPause(1400,300); if(ab()){setDemoBtn(false);return;}
+
+  // AI Recommend tests
+  const swRecBtn=document.querySelector('[onclick="swAiRec()"]');
+  if(swRecBtn)scrollTo(swRecBtn);
+  await humanPause(700,200); if(ab()){setDemoBtn(false);return;}
+  swAiRec();
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Run SW tests
+  scrollTo(document.getElementById('btn-sw-run'));
+  await humanPause(800,200); if(ab()){setDemoBtn(false);return;}
+  await runSwTests();
+  if(ab()){setDemoBtn(false);return;}
+
+  // Scroll to SW results table
+  const swRt=document.getElementById('sw-rtcard');
+  if(swRt)scrollTo(swRt);
+  await humanPause(2000,400); if(ab()){setDemoBtn(false);return;}
+
+  // ══════════════════════════════════════
+  // TAB 4 — Power Up
+  // ══════════════════════════════════════
+  stab('powerup',tabs[3]);
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Scroll to Connection Control card
+  const pdStEl=document.querySelector('.pd-st');
+  if(pdStEl)scrollTo(pdStEl);
+  await humanPause(900,200); if(ab()){setDemoBtn(false);return;}
+
+  // Connect PD
+  scrollTo(document.getElementById('btn-con'));
+  await humanPause(700,200); if(ab()){setDemoBtn(false);return;}
+  await connectPD();
+  if(ab()){setDemoBtn(false);return;}
+
+  // Scroll down to see waveform
+  const waveArea=document.querySelector('.wave-area');
+  if(waveArea)scrollTo(waveArea);
+  await humanPause(3000,500); if(ab()){setDemoBtn(false);return;}  // watch waveform live
+
+  // Scroll back up to see voltage/current metrics
+  const pdMet=document.getElementById('pd-met');
+  if(pdMet)scrollTo(pdMet);
+  await humanPause(2000,400); if(ab()){setDemoBtn(false);return;}
+
+  // Disconnect
+  scrollTo(document.getElementById('btn-dis'));
+  await humanPause(600,200); if(ab()){setDemoBtn(false);return;}
+  disconnectPD();
+  await humanPause(800,200); if(ab()){setDemoBtn(false);return;}
+
+  // ══════════════════════════════════════
+  // TAB 5 — Conf. Test
+  // ══════════════════════════════════════
+  stab('conftest',tabs[4]);
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Select DUT = M4350-40X4C
+  const dutSel=document.getElementById('conf-dut-sel');
+  scrollTo(dutSel);
+  await humanPause(900,200); if(ab()){setDemoBtn(false);return;}
+  dutSel.value='40X4C'; onConfDutChange();
+  await humanPause(800,200); if(ab()){setDemoBtn(false);return;}
+
+  // AI Recommend
+  const recBtn=document.querySelector('[onclick="aiRec()"]');
+  scrollTo(recBtn);
+  await humanPause(700,200); if(ab()){setDemoBtn(false);return;}
+  aiRec();
+  await humanPause(1000,300); if(ab()){setDemoBtn(false);return;}
+
+  // Pause on LLDP FAIL badge
+  const lldpEl=document.getElementById('t-class_lldp');
+  scrollTo(lldpEl);
+  await humanPause(1800,300); if(ab()){setDemoBtn(false);return;}
+
+  // Run conformance tests
+  const allTests=Object.keys(TD);
+  testsRunning=true;
+  document.getElementById('rtcard').style.display='block';
+  document.getElementById('rtbody').innerHTML='';
+  let p=0,w=0,f=0;
+  document.getElementById('r-p').textContent=0;
+  document.getElementById('r-w').textContent=0;
+  document.getElementById('r-f').textContent=0;
+
+  for(let i=0;i<allTests.length;i++){
+    if(ab())break;
+    const id=allTests[i],def=TD[id];
+    const el=document.getElementById('t-'+id);
+    if(el){
+      el.classList.remove('air');
+      el.classList.add('run');
+      el.querySelector('.cbs').innerHTML='<span class="sr">RUN</span>';
+      if(i%3===0)scrollTo(el);
+    }
+    document.getElementById('conf-st').textContent=`Running: ${id} (${i+1}/${allTests.length})`;
+    document.getElementById('tprog').style.width=((i/allTests.length)*100)+'%';
+    document.getElementById('tcnt').textContent=`${i+1} / ${allTests.length}`;
+
+    const waitMs=def.res==='FAIL'?900+Math.random()*300:480+Math.random()*220;
+    await sleep(waitMs); if(ab())break;
+
+    if(el)el.classList.remove('run');
+    const res=def.res;
+    if(res==='PASS'){if(el){el.classList.add('pass');el.querySelector('.cbs').innerHTML='<span class="sp">PASS</span>';}p++;}
+    else if(res==='WARN'){if(el){el.classList.add('warn');el.querySelector('.cbs').innerHTML='<span class="sw">WARN</span>';}w++;}
+    else{
+      if(el){el.classList.add('fail');el.querySelector('.cbs').innerHTML='<span class="sf">FAIL</span>';}
+      f++;
+      scrollTo(el);
+      await humanPause(1400,200); if(ab())break;
+    }
+    addRow(id,def,res);
+    document.getElementById('r-p').textContent=p;
+    document.getElementById('r-w').textContent=w;
+    document.getElementById('r-f').textContent=f;
+  }
+
+  testsRunning=false;
+  document.getElementById('tprog').style.width='100%';
+  document.getElementById('tcnt').textContent=`${p+w+f} / ${allTests.length} complete`;
+  document.getElementById('conf-st').textContent=`✅ Done — ${p} PASS  ${f} FAIL`;
+  if(ab()){setDemoBtn(false);return;}
+
+  scrollTo(document.getElementById('rtcard'));
+  await humanPause(2500,400); if(ab()){setDemoBtn(false);return;}
+
+  // ══════════════════════════════════════
+  // TAB 6 — AI Insights
+  // ══════════════════════════════════════
+  stab('aiinsights',tabs[5]);
+  await humanPause(800,200); if(ab()){setDemoBtn(false);return;}
+  loadRealResults();
+
+  scrollTo(document.getElementById('score-ring'));
+  await humanPause(2500,400); if(ab()){setDemoBtn(false);return;}
+
+  scrollTo(document.getElementById('ai-anom'));
+  await humanPause(2200,400); if(ab()){setDemoBtn(false);return;}
+
+  scrollTo(document.getElementById('ai-rpt'));
+  await humanPause(2000,400); if(ab()){setDemoBtn(false);return;}
+
+  showModal('🎯','Sifos Interop Index: 97.34%',
+    '<div style="text-align:center;margin-bottom:10px">'+
+    '<span style="font-size:38px;font-weight:800;color:#00875a">97.34%</span></div>'+
+    '<strong>125 PASS · 2 FAIL</strong> across 4 M4350 DUTs (v14.0.4.8)<br><br>'+
+    '🔴 <strong>AI Detected Firmware Bug:</strong><br>'+
+    'M4350-40X4C — <code style="font-size:11px;background:#f0f2f6;padding:2px 6px;border-radius:3px">class_lldp</code> FAIL<br>'+
+    'LLDP Power Class = 0 on ports 3-2 &amp; 4-2 (expected 1)<br>'+
+    '<span style="font-size:11px;color:#d97706">FW v14.0.4.8 defect · Workaround: Max Power Grant = PHY</span>','ok');
+
+  autoDemoRunning=false;
+  setDemoBtn(false);
+}
+
+// ── CHARTS ──
+function initCharts(){
+  new Chart(document.getElementById('cls-chart').getContext('2d'),{
+    type:'bar',
+    data:{labels:['C0','C1','C2','C3','C4','C5','C6','C7','C8'],
+      datasets:[
+        {label:'IEEE Spec (W)',data:[15.4,4,7,15.4,30,45,60,75,90],backgroundColor:'#e2e7ef',borderColor:'#9aa3b0',borderWidth:1},
+        {label:'M4350 Actual (W)',data:[16.2,4.2,7.4,16.2,31.2,48.6,65,81.8,97],backgroundColor:'#00c47c50',borderColor:'#00875a',borderWidth:1.5},
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#6b7280',font:{size:10}}}},
+      scales:{x:{ticks:{color:'#9aa3b0',font:{size:10}},grid:{color:'#f0f2f6'}},y:{ticks:{color:'#9aa3b0',font:{size:10}},grid:{color:'#f0f2f6'},title:{display:true,text:'Watts',color:'#9aa3b0',font:{size:10}}}}}
+  });
+  new Chart(document.getElementById('flt-chart').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['No Error','Overload','Short','Power Denied','Startup Fail','OVLO','UVLO','Thermal'],
+      datasets:[{data:[38,18,10,14,7,5,4,4],
+        backgroundColor:['#00c47c','#f59e0b','#dc2626','#7c3aed','#fb923c','#0097d6','#2dd4bf','#f472b6'],
+        borderColor:['#005a38','#b45309','#991b1b','#4c1d95','#c2410c','#005f8a','#0e7490','#9d174d'],
+        borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#6b7280',font:{size:9},padding:7}}}}
+  });
+}
+
+
+// ── SW TEST TAB ──
+let swStop=false,swRunning=false;
+let swSelectedModel=null;
+const swParams={det:'4ptdot3af',pm:'Dynamic',pl:'Class',threshold:30,fault:'no_err',trap:'Enable'};
+
+const SW_TEST_DEFS={
+  'sw-t-det_4pt':      {label:'Detection Type = 4ptdot3af',    swCfg:'Detection Type = 4ptdot3af',           sifosCfg:'Standard 4-point detect · Sig R: 23–26kΩ',               exp:'PASS',res:'PASS',note:'IEEE 802.3 compliant detection'},
+  'sw-t-det_legacy_plus':{label:'Detection Type = 4ptdot3af+legacy',swCfg:'Detection Type = 4ptdot3af+legacy', sifosCfg:'Extended mode · fallback enabled',                        exp:'PASS',res:'PASS',note:'SW falls back to legacy if 4pt fails'},
+  'sw-t-det_legacy':   {label:'Detection Type = legacy',         swCfg:'Detection Type = legacy',              sifosCfg:'⚠ Not supported by Sifos — N/A',                          exp:'WARN',res:'WARN',note:'Sifos cannot validate legacy detection. SW auto-reverts.'},
+  'sw-t-thresh_below': {label:'Sys Usage Threshold (below)',     swCfg:'Sys Usage Threshold: 90% | Load: below',sifosCfg:'Load: 10W · Monitor consumed power',                    exp:'PASS',res:'PASS',note:'Consumed < Threshold → no alert'},
+  'sw-t-thresh_exceed':{label:'Sys Usage Threshold (exceed)',    swCfg:'Sys Usage Threshold: 90% | Load: exceed',sifosCfg:'Load: 20W · Verify threshold behavior',                  exp:'WARN',res:'WARN',note:'⚠ M4350-96: SW allows exceed when Total Budget available'},
+  'sw-t-pm_dynamic':   {label:'Power Management Mode = Dynamic', swCfg:'Power Management Mode = Dynamic',        sifosCfg:'Measure actual consumed power',                           exp:'PASS',res:'PASS',note:'Budget = actual W consumed'},
+  'sw-t-pm_static':    {label:'Power Management Mode = Static',  swCfg:'Power Management Mode = Static',         sifosCfg:'Measure allocated class power (C0=16.2W C4=31.2W)',       exp:'PASS',res:'PASS',note:'Budget = class max (M4350 values)'},
+  'sw-t-pl_none':      {label:'Power Limit Type = None',         swCfg:'Power Limit Type = None',              sifosCfg:'No SW limit · HW ceiling only',                           exp:'PASS',res:'PASS',note:'No software power ceiling'},
+  'sw-t-pl_class':     {label:'Power Limit Type = Class',        swCfg:'Power Limit Type = Class',             sifosCfg:'Enforce IEEE class limit · cutoff if exceeded',            exp:'PASS',res:'PASS',note:'Class limit per IEEE 802.3'},
+  'sw-t-pl_user':      {label:'Power Limit Type = User',         swCfg:'Power Limit Type = User | Power Limit (W) = 25',        sifosCfg:'Enforce user limit: 25W',                                 exp:'PASS',res:'PASS',note:'User-defined ceiling applied'},
+  'sw-t-f_no_err':     {label:'Fault Status = No Error',         swCfg:'Fault Status = No Error',       sifosCfg:'Normal load · PSE operating',                             exp:'PASS',res:'PASS',note:'No fault flags set'},
+  'sw-t-f_mps':        {label:'Fault Status = MPS Absent',       swCfg:'Fault Status = MPS Absent',     sifosCfg:'Remove MPS signal → power-down',                          exp:'PASS',res:'PASS',note:'Port de-energized within 75ms'},
+  'sw-t-f_short':      {label:'Fault Status = Short',            swCfg:'Fault Status = Short',          sifosCfg:'Apply short circuit on port',                             exp:'PASS',res:'PASS',note:'PSE detects short, removes power'},
+  'sw-t-f_overload':   {label:'Fault Status = Overload',         swCfg:'Fault Status = Overload',       sifosCfg:'Exceed class current limit',                              exp:'PASS',res:'PASS',note:'Current > class max → overload flag'},
+  'sw-t-f_denied':     {label:'Fault Status = Power Denied',     swCfg:'Fault Status = Power Denied',   sifosCfg:'Exhaust total PoE budget',                                exp:'PASS',res:'PASS',note:'No budget → port denied'},
+  'sw-t-f_thermal':    {label:'Fault Status = Thermal SD',       swCfg:'Fault Status = Thermal SD',     sifosCfg:'Simulate PSE chip over-temp',                             exp:'PASS',res:'PASS',note:'Thermal SD flag set'},
+  'sw-t-f_startup':    {label:'Fault Status = Startup Failure',  swCfg:'Fault Status = Startup Failure',   sifosCfg:'Block power-up handshake',                                exp:'PASS',res:'PASS',note:'PD fails handshake → startup_fail'},
+  'sw-t-f_ovlo':       {label:'Fault Status = OVLO',             swCfg:'Fault Status = OVLO',           sifosCfg:'PSU voltage above OVLO threshold',                        exp:'PASS',res:'PASS',note:'PSU V too high → OVLO lockout'},
+  'sw-t-f_uvlo':       {label:'Fault Status = UVLO',             swCfg:'Fault Status = UVLO',           sifosCfg:'PSU voltage below UVLO threshold',                        exp:'PASS',res:'PASS',note:'PSU V too low → UVLO lockout'},
+  'sw-t-trap_en':      {label:'Traps = Enable',                  swCfg:'Traps = Enable',             sifosCfg:'Connect PD → verify SNMP trap fired',                     exp:'PASS',res:'PASS',note:'pethPsePortOnOffNotification sent'},
+  'sw-t-trap_dis':     {label:'Traps = Disable',                 swCfg:'Traps = Disable',            sifosCfg:'Connect PD → verify no SNMP trap sent',                   exp:'PASS',res:'PASS',note:'No notification on power event'},
+  'sw-t-pp_en':        {label:'Port Power = Enable',              swCfg:'Port Power = Enable',       sifosCfg:'Apply load → verify PSE powers up port',                  exp:'PASS',res:'PASS',note:'Port transitions from Disabled to Searching→Delivering'},
+  'sw-t-pp_dis':       {label:'Port Power = Disable',             swCfg:'Port Power = Disable',      sifosCfg:'No load applied · verify port stays off',                 exp:'PASS',res:'PASS',note:'Disabled port must not deliver power'},
+  'sw-t-hp_yes':       {label:'High Power = Yes',                 swCfg:'High Power = Yes',          sifosCfg:'Apply 60–90W load · verify LLDP class negotiation',        exp:'PASS',res:'PASS',note:'802.3bt 4-pair negotiation required'},
+  'sw-t-hp_no':        {label:'High Power = No',                  swCfg:'High Power = No',           sifosCfg:'Apply ≤30W load · verify class 0–4',                      exp:'PASS',res:'PASS',note:'High-power mode off → 2-pair ≤30W only'},
+  'sw-t-prio_low':     {label:'Port Priority = Low',              swCfg:'Port Priority = Low',            sifosCfg:'Exhaust budget · verify Low-priority port dropped first',  exp:'PASS',res:'PASS',note:'Low dropped before High/Critical'},
+  'sw-t-prio_high':    {label:'Port Priority = High',             swCfg:'Port Priority = High',           sifosCfg:'Exhaust budget · verify High survives vs Low',             exp:'PASS',res:'PASS',note:'High survives when Low is cut'},
+  'sw-t-prio_crit':    {label:'Port Priority = Critical',         swCfg:'Port Priority = Critical',       sifosCfg:'Exhaust budget · verify Critical survives last',           exp:'PASS',res:'PASS',note:'Critical is last to be de-energized'},
+  'sw-t-pmode_af':     {label:'Power Mode = 802.3af',             swCfg:'Power Mode = 802.3af',      sifosCfg:'Class 0–3 load ≤15.4W · reject bt PD',                   exp:'PASS',res:'PASS',note:'af mode caps at class 3'},
+  'sw-t-pmode_at':     {label:'Power Mode = 802.3at',             swCfg:'Power Mode = 802.3at',      sifosCfg:'Class 4 load ≤30W · reject bt PD',                        exp:'PASS',res:'PASS',note:'at mode caps at class 4'},
+  'sw-t-pmode_bt':     {label:'Power Mode = 802.3bt',             swCfg:'Power Mode = 802.3bt',      sifosCfg:'Class 5–8 load ≤90W · LLDP negotiate',                    exp:'PASS',res:'PASS',note:'bt mode required for High Power'},
+  'sw-t-disc_dc':      {label:'Disconnect Type = DC',             swCfg:'Disconnect Type = DC',           sifosCfg:'Remove DC load · verify port de-energizes',               exp:'PASS',res:'PASS',note:'DC disconnect within 300ms'},
+  'sw-t-disc_acdc':    {label:'Disconnect Type = AC+DC',          swCfg:'Disconnect Type = AC+DC',        sifosCfg:'Remove DC+AC MPS · verify port de-energizes',             exp:'PASS',res:'PASS',note:'AC+DC detection for wider PD compatibility'},
+  'sw-t-timer_none':   {label:'Timer Schedule = None',            swCfg:'Timer Schedule = None',              sifosCfg:'Port always on · verify 24h operation',                   exp:'PASS',res:'PASS',note:'No schedule restriction applied'},
+  'sw-t-timer_sch':    {label:'Timer Schedule = Schedule 1',      swCfg:'Timer Schedule = Schedule 1',         sifosCfg:'Wait for schedule window · verify on/off at boundary',    exp:'PASS',res:'PASS',note:'Port powers on/off per schedule definition'},
+};
+
+const SW_AI_REC_MAP={
+  at: ['sw-t-det_4pt','sw-t-det_legacy_plus','sw-t-det_legacy','sw-t-thresh_below','sw-t-thresh_exceed','sw-t-pm_dynamic','sw-t-pm_static','sw-t-pl_class','sw-t-f_no_err','sw-t-f_overload','sw-t-f_denied','sw-t-trap_en','sw-t-pp_en','sw-t-pp_dis','sw-t-prio_low','sw-t-prio_high','sw-t-pmode_at','sw-t-disc_dc','sw-t-timer_none'],
+  af: ['sw-t-det_4pt','sw-t-det_legacy_plus','sw-t-thresh_below','sw-t-pm_dynamic','sw-t-pl_none','sw-t-pl_class','sw-t-f_no_err','sw-t-f_overload','sw-t-f_denied','sw-t-pp_en','sw-t-prio_low','sw-t-pmode_af','sw-t-disc_dc','sw-t-timer_none'],
+  bt4:['sw-t-det_4pt','sw-t-det_legacy_plus','sw-t-det_legacy','sw-t-thresh_below','sw-t-thresh_exceed','sw-t-pm_dynamic','sw-t-pm_static','sw-t-pl_class','sw-t-pl_user','sw-t-f_no_err','sw-t-f_mps','sw-t-f_short','sw-t-f_overload','sw-t-f_denied','sw-t-f_thermal','sw-t-f_startup','sw-t-f_ovlo','sw-t-f_uvlo','sw-t-trap_en','sw-t-trap_dis','sw-t-pp_en','sw-t-pp_dis','sw-t-hp_yes','sw-t-hp_no','sw-t-prio_low','sw-t-prio_high','sw-t-prio_crit','sw-t-pmode_bt','sw-t-disc_dc','sw-t-disc_acdc','sw-t-timer_none'],
+  bt3:['sw-t-det_4pt','sw-t-det_legacy_plus','sw-t-thresh_below','sw-t-thresh_exceed','sw-t-pm_dynamic','sw-t-pm_static','sw-t-pl_class','sw-t-pl_user','sw-t-f_no_err','sw-t-f_overload','sw-t-f_denied','sw-t-f_thermal','sw-t-trap_en'],
+};
+
+function initSwModelDropdown(){
+  const sel=document.getElementById('sw-model-sel');
+  if(!sel)return;
+  M4350_SPECS.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s.model;opt.textContent=`${s.model}  (${s.poe_type})`;
+    sel.appendChild(opt);
+  });
+}
+
+function onSwModelChange(){
+  const val=document.getElementById('sw-model-sel').value;
+  swSelectedModel=M4350_SPECS.find(s=>s.model===val)||null;
+  const info=document.getElementById('sw-model-info');
+  const ph=document.getElementById('sw-model-ph');
+  if(swSelectedModel){
+    info.style.display='flex';ph.style.display='none';
+    document.getElementById('swmi-phase').textContent='Phase '+swSelectedModel.phase;
+    document.getElementById('swmi-part').textContent=swSelectedModel.part;
+    document.getElementById('swmi-std').textContent=swSelectedModel.poe_type;
+    document.getElementById('swmi-maxp').textContent=swSelectedModel.max_port;
+    document.getElementById('swmi-budget').textContent=swSelectedModel.budget_base+'–'+swSelectedModel.budget_max;
+    updateSifosSummary();
+    setAI(`✅ DUT: <strong>${swSelectedModel.model}</strong> (${swSelectedModel.poe_type})<br>Select test items and click Run.`,`💡 Click 🤖 AI Recommend to auto-select tests for this model`);
+  } else {
+    info.style.display='none';ph.style.display='block';
+  }
+}
+
+function selSwParam(gid,el,param,val){
+  if(param==='det'&&val==='legacy'){showLegacyModal();return;}
+  document.getElementById(gid).querySelectorAll('.ri').forEach(x=>{x.classList.remove('sel');x.querySelector('.rd').classList.remove('sel');});
+  el.classList.add('sel');el.querySelector('.rd').classList.add('sel');
+  swParams[param]=val;
+  updateSifosSummary();
+}
+
+function updateSifosSummary(){
+  if(!swSelectedModel)return;
+  const tag=swSelectedModel.poe_tag;
+  const sifos=SIFOS_CFG_MAP[TAG_TO_SIFOS[tag]]||SIFOS_CFG_MAP.at;
+  const div=document.getElementById('sw-sifos-rows');
+  const rows=[
+    ['PSE Type', sifos.type, '#0097d6'],
+    ['Pairs', sifos.pairs, '#243046'],
+    ['Max Grant', sifos.maxGrant, '#00875a'],
+    ['Detection', swParams.det, '#243046'],
+    ['Pwr Mgmt', swParams.pm, '#7c3aed'],
+    ['Limit Type', swParams.pl, '#243046'],
+    ['Sys Threshold', document.getElementById('sw-threshold').value+'%', '#d97706'],
+    ['Traps', swParams.trap, swParams.trap==='Enable'?'#00875a':'#dc2626'],
+  ];
+  div.innerHTML=rows.map(([k,v,col])=>`<div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #d1fae5;border-radius:20px;padding:4px 11px;white-space:nowrap"><span style="font-size:10px;color:#9aa3b0;font-weight:600">${k}</span><span style="font-size:12px;font-weight:800;color:${col}">${v}</span></div>`).join('');
+  document.getElementById('sw-sifos-summary').style.display='block';
+}
+
+function swTgl(el){
+  const b=el.querySelector('.cb');b.classList.toggle('chk');b.textContent=b.classList.contains('chk')?'✓':'';
+}
+function swCheckAll(){document.querySelectorAll('[id^="sw-t-"] .cb').forEach(b=>{b.classList.add('chk');b.textContent='✓';});}
+function swClearAll(){
+  document.querySelectorAll('[id^="sw-t-"] .cb').forEach(b=>{b.classList.remove('chk','air');b.textContent='';});
+  document.querySelectorAll('[id^="sw-t-"]').forEach(x=>x.classList.remove('air','pass','warn','fail','run'));
+}
+function swAiRec(){
+  if(!swSelectedModel){toast('⚠️ Select a model first.');return;}
+  swClearAll();
+  const recs=SW_AI_REC_MAP[swSelectedModel.poe_tag]||SW_AI_REC_MAP.at;
+  recs.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.add('air');const b=el.querySelector('.cb');b.classList.add('chk','air');b.textContent='✓';
+  });
+  toast(`🤖 AI selected ${recs.length} tests for ${swSelectedModel.model}`);
+  setAI(`🤖 AI selected <strong>${recs.length}</strong> tests for <strong>${swSelectedModel.model}</strong>`,`▶ Click Run to begin`);
+}
+
+function swGetSel(){
+  return [...document.querySelectorAll('[id^="sw-t-"]')].filter(e=>e.querySelector('.cb').classList.contains('chk')).map(e=>e.id);
+}
+
+async function runSwTests(){
+  if(swRunning)return;
+  if(!swSelectedModel){toast('⚠️ Please select a switch model first.');return;}
+  const sel=swGetSel();
+  if(!sel.length){toast('⚠️ Select at least one test item.');return;}
+  swRunning=true;swStop=false;
+  document.getElementById('btn-sw-run').disabled=true;
+  document.getElementById('btn-sw-stop').disabled=false;
+  document.getElementById('sw-rtcard').style.display='block';
+  document.getElementById('sw-rtbody').innerHTML='';
+  let p=0,w=0,f=0;
+  document.getElementById('sw-rp').textContent=0;document.getElementById('sw-rw').textContent=0;document.getElementById('sw-rf').textContent=0;
+  updateSifosSummary();
+  setAI(`🔄 Testing <strong>${swSelectedModel.model}</strong>...<br>${sel.length} items`);
+  for(let i=0;i<sel.length;i++){
+    if(swStop)break;
+    const id=sel[i],def=SW_TEST_DEFS[id];
+    if(!def)continue;
+    const el=document.getElementById(id);
+    el.classList.remove('air');el.classList.add('run');
+    el.querySelector('.cbs').innerHTML='<span class="sr">RUN</span>';
+    document.getElementById('sw-status').textContent=`Running: ${def.label} (${i+1}/${sel.length})`;
+    document.getElementById('sw-prog').style.width=((i/sel.length)*100)+'%';
+    await sleep(450+Math.random()*250);
+    if(swStop)break;
+    el.classList.remove('run');
+    const col={PASS:'#00875a',WARN:'#d97706',FAIL:'#dc2626'};
+    const bg={PASS:'#d4f5e6',WARN:'#fff7e0',FAIL:'#fde8e8'};
+    const resCls={PASS:'pass',WARN:'warn',FAIL:'fail'};
+    el.classList.add(resCls[def.res]);
+    el.querySelector('.cbs').innerHTML=`<span style="color:${col[def.res]};font-weight:800">${def.res}</span>`;
+    if(def.res==='PASS')p++;else if(def.res==='WARN')w++;else f++;
+    document.getElementById('sw-rp').textContent=p;document.getElementById('sw-rw').textContent=w;document.getElementById('sw-rf').textContent=f;
+    // add result row
+    const tr=document.createElement('tr');
+    tr.style.cssText=`background:${bg[def.res]};border-bottom:1px solid #f0f2f6`;
+    tr.innerHTML=`<td style="padding:8px 12px;font-family:monospace;font-size:11px;color:#9aa3b0">TC-${String(i+1).padStart(2,'0')}</td>
+      <td style="padding:8px 12px;font-size:12px;font-weight:600;color:#243046;white-space:nowrap">${def.label}</td>
+      <td style="padding:8px 12px;font-size:11px;color:#374151;white-space:nowrap">${def.swCfg}</td>
+      <td style="padding:8px 12px;font-size:11px;font-family:monospace;color:#374151">${def.sifosCfg}</td>
+      <td style="padding:8px 12px;font-weight:800;color:${col[def.res]};white-space:nowrap">${def.res}</td>
+      <td style="padding:8px 12px;font-size:10px;color:#d97706">${def.note}</td>`;
+    document.getElementById('sw-rtbody').appendChild(tr);
+  }
+  document.getElementById('sw-prog').style.width='100%';
+  document.getElementById('sw-status').textContent=swStop?`Stopped — ${p} PASS ${w} WARN ${f} FAIL`:`✅ Complete — ${p} PASS  ${w} WARN  ${f} FAIL`;
+  document.getElementById('btn-sw-run').disabled=false;document.getElementById('btn-sw-stop').disabled=true;
+  swRunning=false;
+  if(!swStop){
+    setAI(`✅ ${swSelectedModel.model} testing complete!<br><strong>${p} PASS · ${w} WARN · ${f} FAIL</strong>`,w>0?`⚠️ WARN items should be logged in the test report`:`🎉 All passed!`);
+    toast(`✅ ${p} PASS · ${w} WARN · ${f} FAIL`);
+  }
+}
+
+
+</script>
+<!-- Center Modal -->
+<div class="cmodal-ov" id="cmodal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="cmodal">
+    <div class="cmodal-icon" id="cmodal-icon">✅</div>
+    <div class="cmodal-title" id="cmodal-title">Success</div>
+    <div class="cmodal-msg" id="cmodal-msg"></div>
+    <button class="cmodal-close ok" id="cmodal-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+</body>
+</html>
