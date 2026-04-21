@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>IntelliPoE – AI-Driven PoE Validation Platform | NETGEAR</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f6;color:#243046;height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -219,10 +220,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <div class="legacy-msg">
       Sifos PowerSync Interactive 5 does <strong>not support "legacy" detection mode</strong>.<br><br>
       Legacy (802.3af pre-standard) detection is available as a DUT software configuration option on M4350, but the Sifos PSA hardware cannot emulate or validate this mode.<br><br>
-      The selection will automatically revert to <strong>"4ptdot3af"</strong>.
+      Please click the button below to revert to <strong>"4ptdot3af"</strong>.
     </div>
     <button class="legacy-close" onclick="closeLegacyModal()">Understood – Revert to 4ptdot3af</button>
-    <div class="legacy-cnt" id="legacy-cnt">Auto-reverting in 5s...</div>
+    <div class="legacy-cnt" id="legacy-cnt"></div>
   </div>
 </div>
 
@@ -325,7 +326,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   <div class="tb" onclick="stab('powerup',this)">Power Up</div>
   <div class="tb" onclick="stab('conftest',this)">Conf. Test</div>
   <div class="tb ait" onclick="stab('aiinsights',this)">✨ AI Insights</div>
-
+  <div class="tb" onclick="stab('help',this)">📖 Help</div>
 </div>
 
 <!-- ══ PSE TAB ══ -->
@@ -677,8 +678,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   <div class="ctitle">AI Generated Test Report</div>
   <div id="ai-rpt" style="font-size:12px;color:#9aa3b0;line-height:1.75">Run the conformance test suite to generate an AI report.</div>
   <div id="ai-rpt-act" style="display:none;margin-top:10px;gap:7px">
-    <button class="btn btn-a" onclick="toast('📄 Exported to Excel.')">Export to Excel</button>
-    <button class="btn btn-s" onclick="toast('📧 Sent to team.')">Send to Team</button>
+    <button class="btn btn-a" onclick="exportToExcel()">📊 Export to Excel</button>
+    <button class="btn btn-s" onclick="openTeamReport()">📄 Full Report</button>
   </div>
 </div>
 </div>
@@ -866,6 +867,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 
 <!-- Right: Test Item Selector + Execute -->
 <div style="display:flex;flex-direction:column;gap:10px">
+
+  <!-- Run controls — TOP -->
+  <div class="card" style="padding:12px 16px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-a" id="btn-sw-run" onclick="runSwTests()" style="padding:9px 28px;font-size:13px">▶ Run Selected Tests</button>
+      <button class="btn btn-d btn-sm" id="btn-sw-stop" onclick="swStop=true" disabled>Stop</button>
+      <div style="flex:1">
+        <div class="pbar"><div class="pfill" id="sw-prog" style="width:0%"></div></div>
+        <div style="font-size:10px;color:#9aa3b0;margin-top:2px" id="sw-status">Ready</div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:13px;font-weight:700">
+        <span>PASS: <span class="sp" id="sw-rp">0</span></span>
+        <span>WARN: <span class="sw" id="sw-rw">0</span></span>
+        <span>FAIL: <span class="sf" id="sw-rf">0</span></span>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div class="ctitle" style="margin:0">Select Test Items</div>
@@ -941,27 +960,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
   </div>
 
-  <!-- Run controls -->
-  <div class="card" style="padding:12px 16px">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-a" id="btn-sw-run" onclick="runSwTests()" style="padding:9px 28px;font-size:13px">▶ Run Selected Tests</button>
-      <button class="btn btn-d btn-sm" id="btn-sw-stop" onclick="swStop=true" disabled>Stop</button>
-      <div style="flex:1">
-        <div class="pbar"><div class="pfill" id="sw-prog" style="width:0%"></div></div>
-        <div style="font-size:10px;color:#9aa3b0;margin-top:2px" id="sw-status">Ready</div>
-      </div>
-      <div style="display:flex;gap:14px;font-size:13px;font-weight:700">
-        <span>PASS: <span class="sp" id="sw-rp">0</span></span>
-        <span>WARN: <span class="sw" id="sw-rw">0</span></span>
-        <span>FAIL: <span class="sf" id="sw-rf">0</span></span>
-      </div>
-    </div>
-  </div>
-
   <!-- Results table -->
   <div class="card" id="sw-rtcard" style="display:none;padding:0;overflow:hidden">
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f7f9fc;border-bottom:1px solid #e2e7ef">
+      <span style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Test Results</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span id="sw-sel-count" style="font-size:11px;color:#9aa3b0;display:none">0 selected</span>
+        <button id="btn-sw-del" class="btn btn-d btn-sm" onclick="swDeleteSelected()" style="display:none;padding:3px 10px;font-size:11px">🗑 Delete</button>
+        <button class="btn btn-s btn-sm" onclick="swSelectAllRows()" style="padding:3px 10px;font-size:11px">Select All</button>
+        <button class="btn btn-s btn-sm" onclick="swClearAllRows()" style="padding:3px 10px;font-size:11px">Clear</button>
+      </div>
+    </div>
+    <table id="sw-results-tbl" style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="background:#243046;color:#fff">
+        <th style="padding:8px 8px;width:32px"><input type="checkbox" id="sw-chk-all" onchange="swToggleAllRows(this)" style="cursor:pointer"></th>
         <th style="padding:8px 12px;text-align:left;font-size:11px">#</th>
         <th style="padding:8px 12px;text-align:left;font-size:11px">Test Item</th>
         <th style="padding:8px 12px;text-align:left;font-size:11px">SW Config Applied</th>
@@ -1657,13 +1669,7 @@ function selDetType(el,val){
 }
 function showLegacyModal(){
   document.getElementById('legacy-modal').classList.add('show');
-  let cnt=5;
-  document.getElementById('legacy-cnt').textContent='Auto-reverting in '+cnt+'s...';
-  legacyTimer=setInterval(()=>{
-    cnt--;
-    if(cnt<=0){closeLegacyModal();clearInterval(legacyTimer);}
-    else{document.getElementById('legacy-cnt').textContent='Auto-reverting in '+cnt+'s...';}
-  },1000);
+  document.getElementById('legacy-cnt').textContent='';
 }
 function closeLegacyModal(){
   document.getElementById('legacy-modal').classList.remove('show');
@@ -2552,7 +2558,8 @@ async function runSwTests(){
     // add result row
     const tr=document.createElement('tr');
     tr.style.cssText=`background:${bg[def.res]};border-bottom:1px solid #f0f2f6`;
-    tr.innerHTML=`<td style="padding:8px 12px;font-family:monospace;font-size:11px;color:#9aa3b0">TC-${String(i+1).padStart(2,'0')}</td>
+    tr.innerHTML=`<td style="padding:8px 8px;text-align:center"><input type="checkbox" class="sw-row-chk" onchange="swUpdateSelCount()" style="cursor:pointer"></td>
+      <td style="padding:8px 12px;font-family:monospace;font-size:11px;color:#9aa3b0">TC-${String(i+1).padStart(2,'0')}</td>
       <td style="padding:8px 12px;font-size:12px;font-weight:600;color:#243046;white-space:nowrap">${def.label}</td>
       <td style="padding:8px 12px;font-size:11px;color:#374151;white-space:nowrap">${def.swCfg}</td>
       <td style="padding:8px 12px;font-size:11px;font-family:monospace;color:#374151">${def.sifosCfg}</td>
@@ -2570,6 +2577,327 @@ async function runSwTests(){
   }
 }
 
+// ── SW RESULT ROW SELECT/DELETE ──
+function swUpdateSelCount(){
+  const chks=document.querySelectorAll('.sw-row-chk:checked');
+  const total=document.querySelectorAll('.sw-row-chk');
+  const n=chks.length;
+  const countEl=document.getElementById('sw-sel-count');
+  const delBtn=document.getElementById('btn-sw-del');
+  const allChk=document.getElementById('sw-chk-all');
+  countEl.style.display=n>0?'inline':'none';
+  countEl.textContent=n+' selected';
+  delBtn.style.display=n>0?'inline-block':'none';
+  if(allChk)allChk.checked=(n===total.length&&n>0);
+}
+function swToggleAllRows(chk){
+  document.querySelectorAll('.sw-row-chk').forEach(c=>{c.checked=chk.checked;});
+  swUpdateSelCount();
+}
+function swSelectAllRows(){
+  document.querySelectorAll('.sw-row-chk').forEach(c=>{c.checked=true;});
+  const a=document.getElementById('sw-chk-all');if(a)a.checked=true;
+  swUpdateSelCount();
+}
+function swClearAllRows(){
+  document.querySelectorAll('.sw-row-chk').forEach(c=>{c.checked=false;});
+  const a=document.getElementById('sw-chk-all');if(a)a.checked=false;
+  swUpdateSelCount();
+}
+function swDeleteSelected(){
+  document.querySelectorAll('.sw-row-chk:checked').forEach(c=>{
+    c.closest('tr').remove();
+  });
+  // re-number
+  document.querySelectorAll('#sw-rtbody tr').forEach((tr,i)=>{
+    const tc=tr.querySelector('td:nth-child(2)');
+    if(tc)tc.textContent='TC-'+String(i+1).padStart(2,'0');
+  });
+  const a=document.getElementById('sw-chk-all');if(a)a.checked=false;
+  swUpdateSelCount();
+  const remaining=document.querySelectorAll('#sw-rtbody tr').length;
+  if(remaining===0)document.getElementById('sw-rtcard').style.display='none';
+}
+
+// ── EXPORT TO EXCEL ──
+function exportToExcel(){
+  if(typeof XLSX==='undefined'){toast('⚠️ xlsx library not loaded');return;}
+  const wb=XLSX.utils.book_new();
+  const now=new Date().toISOString().slice(0,10);
+
+  // ── Sheet 1: Summary ──
+  const s1=[
+    ['IntelliPoE — Sifos 802.3at Conformance Test Report'],
+    ['Generated by IntelliPoE AI-Driven PoE Validation Platform'],
+    [''],
+    ['REPORT INFORMATION',''],
+    ['Report Date', now],
+    ['Test Date', '2025-02-03'],
+    ['Platform', 'IntelliPoE v1.0 (POC)'],
+    ['Standard', 'IEEE 802.3at (AT Type-1)'],
+    ['PSA', 'Sifos PowerSync Interactive 5 v5.4.11 · 10.10.0.12'],
+    ['DUT Firmware', 'NETGEAR M4350 Series v14.0.4.8'],
+    [''],
+    ['DETECTION PARAMETERS',''],
+    ['PSE Type', 'AT Type-1 (2-Pair)'],
+    ['Sig R', '24.9 kΩ · ALT A · MDI-X'],
+    ['MPS Method', 'AC MPS · 7.5mA DC'],
+    ['Port Voltage', '48.1V'],
+    [''],
+    ['RESULTS SUMMARY',''],
+    ['Sifos Interop Index', '97.34%'],
+    ['Tests PASSED', 125],
+    ['Tests FAILED', 2],
+    ['Tests WARNED', 0],
+    ['DUTs Tested', 4],
+    [''],
+    ['DUT MODEL','PORTS TESTED','PASS','FAIL','STATUS'],
+    ['M4350-44M4X4V (P1/48)', 48, 32, 0, 'PASS'],
+    ['M4350-24X8F8V (P1/24)', 24, 31, 0, 'PASS'],
+    ['M4350-24G4XF (P1/24)',  24, 31, 0, 'PASS'],
+    ['M4350-40X4C (P1/40)',   40, 31, 2, 'FAIL — class_lldp'],
+  ];
+  const ws1=XLSX.utils.aoa_to_sheet(s1);
+  ws1['!cols']=[{wch:42},{wch:22},{wch:8},{wch:8},{wch:24}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+
+  // ── Sheet 2: Conformance Tests ──
+  const s2hdr=['Test ID','Category','Expected','Measured','Result','Notes'];
+  const s2=[s2hdr];
+  Object.entries(TD).forEach(([id,d])=>{
+    s2.push([id, d.cat, d.exp, d.meas, d.res, d.note||'—']);
+  });
+  const ws2=XLSX.utils.aoa_to_sheet(s2);
+  ws2['!cols']=[{wch:16},{wch:16},{wch:26},{wch:22},{wch:8},{wch:58}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Conformance Tests');
+
+  // ── Sheet 3: Anomaly Report ──
+  const s3=[
+    ['ANOMALY REPORT — AI Auto-Generated'],
+    [''],
+    ['Severity','FAIL'],
+    ['Test Case', 'class_lldp (LLDP Power Class Classification)'],
+    ['Affected DUT', 'M4350-40X4C only'],
+    ['Firmware', 'v14.0.4.8'],
+    ['Failing Ports', 'Port 3-2 (Port 1) · Port 4-2 (Port 40)'],
+    ['Expected', 'Pclass_LLDP = 1'],
+    ['Actual', 'Pclass_LLDP = 0'],
+    [''],
+    ['ROOT CAUSE ANALYSIS',''],
+    ['Diagnosis','LLDP Power Class negotiation returns Class 0 instead of Class 1 during physical classification handshake.'],
+    ['Impact','PDs relying on LLDP power advertisement may receive insufficient power budget. Silent failure — no error flag in switch GUI.'],
+    ['Affected Scope','M4350-40X4C only. M4350-44M4X4V, M4350-24X8F8V, M4350-24G4XF unaffected.'],
+    [''],
+    ['RECOMMENDATIONS',''],
+    ['Immediate Workaround','Set Max Power Grant = PHY (not LLDP / PHY+LLDP) until FW patch released.'],
+    ['Long Term','File FW bug report against M4350-40X4C v14.0.4.8. Target fix in next maintenance release.'],
+    ['Validation','Re-run class_lldp test case after FW patch to confirm resolution.'],
+  ];
+  const ws3=XLSX.utils.aoa_to_sheet(s3);
+  ws3['!cols']=[{wch:24},{wch:72}];
+  XLSX.utils.book_append_sheet(wb,ws3,'Anomaly Report');
+
+  // ── Sheet 4: M4350 SW Test Results (TC-01~TC-27) ──
+  const swRes=document.querySelectorAll('#sw-results-tbl tbody tr');
+  if(swRes.length>0){
+    const s4hdr=['Test Case','SW Configuration','Sifos Setup','Expected','Result','Notes'];
+    const s4=[s4hdr];
+    swRes.forEach(tr=>{
+      const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+      s4.push(cells);
+    });
+    const ws4=XLSX.utils.aoa_to_sheet(s4);
+    ws4['!cols']=[{wch:14},{wch:30},{wch:30},{wch:10},{wch:8},{wch:40}];
+    XLSX.utils.book_append_sheet(wb,ws4,'M4350 SW Tests');
+  }
+
+  XLSX.writeFile(wb,`IntelliPoE_Report_${now}.xlsx`);
+  toast('📊 Excel report downloaded!');
+}
+
+// ── OPEN FULL HTML REPORT ──
+function openTeamReport(){
+  const now=new Date().toLocaleString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Build test rows
+  const rows=Object.entries(TD).map(function(e){
+    var id=e[0],d=e[1];
+    var resBg=d.res==='PASS'?'#f0fdf4':d.res==='FAIL'?'#fff1f1':'#fffbeb';
+    var resTc=d.res==='PASS'?'#166534':d.res==='FAIL'?'#dc2626':'#92400e';
+    var resBadgeBg=d.res==='PASS'?'#dcfce7':d.res==='FAIL'?'#fee2e2':'#fef9c3';
+    var noteTxt=d.note?d.note:'—';
+    return '<tr style="background:'+resBg+';border-bottom:1px solid #e8edf3">'
+      +'<td style="padding:9px 12px;font-family:monospace;font-size:12px;font-weight:700;color:#243046;white-space:nowrap">'+id+'</td>'
+      +'<td style="padding:9px 12px;font-size:11px;color:#6b7280;white-space:nowrap">'+d.cat+'</td>'
+      +'<td style="padding:9px 12px;font-size:11px;color:#374151">'+d.exp+'</td>'
+      +'<td style="padding:9px 12px;font-size:11px;font-weight:600;color:#243046">'+d.meas+'</td>'
+      +'<td style="padding:9px 12px;text-align:center"><span style="background:'+resBadgeBg+';color:'+resTc+';padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap">'+d.res+'</span></td>'
+      +'<td style="padding:9px 12px;font-size:10px;color:'+resTc+';line-height:1.45">'+noteTxt+'</td>'
+      +'</tr>';
+  }).join('');
+
+  var parts=[];
+  parts.push('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">');
+  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1">');
+  parts.push('<title>IntelliPoE Conformance Report</title></head>');
+  parts.push('<body style="margin:0;padding:0;font-family:Segoe UI,Arial,sans-serif;background:#edf0f5;color:#243046">');
+
+  // Header bar
+  parts.push('<div style="background:#243046;padding:0">');
+  parts.push('<div style="background:#00c47c;height:5px"></div>');
+  parts.push('<div style="padding:22px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">');
+  parts.push('<div>');
+  parts.push('<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">');
+  parts.push('<div style="background:#00c47c;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:14px">N</div>');
+  parts.push('<span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px">IntelliPoE</span>');
+  parts.push('<span style="background:rgba(0,196,124,.2);border:1px solid rgba(0,196,124,.4);color:#4dffa8;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.5px">AI-DRIVEN</span>');
+  parts.push('</div>');
+  parts.push('<div style="font-size:13px;color:#9aa3b0">PoE Conformance Test Report &nbsp;·&nbsp; NETGEAR M4350 v14.0.4.8 &nbsp;·&nbsp; Sifos PSA v5.4.11</div>');
+  parts.push('</div>');
+  parts.push('<div style="display:flex;align-items:center;gap:10px">');
+  parts.push('<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 16px">');
+  parts.push('<div style="font-size:10px;color:#9aa3b0;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px">Generated</div>');
+  parts.push('<div style="font-size:13px;color:#fff;font-weight:600">'+now+'</div>');
+  parts.push('</div>');
+  parts.push('<div class="pdf-btn" style="background:linear-gradient(135deg,#00c47c,#00a066);color:#fff;border-radius:8px;padding:12px 20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;white-space:nowrap;min-width:160px;justify-content:center">');
+  parts.push('Generating PDF...</div>');
+  parts.push('</div></div></div>');
+  // print style injected into head via a style tag appended to body
+  parts.push('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+  parts.push('<style>.pdf-btn{cursor:pointer}.no-print{}</style>');
+  parts.push('<script>');
+  parts.push('window.onload=function(){');
+  parts.push('  var btn=document.querySelector(".pdf-btn");');
+  parts.push('  if(btn)btn.textContent="Generating PDF...";');
+  parts.push('  setTimeout(function(){');
+  parts.push('    var el=document.getElementById("rpt-body");');
+  parts.push('    html2pdf().set({filename:"IntelliPoE_Report.pdf",margin:8,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}}).from(el).save().then(function(){');
+  parts.push('      if(btn)btn.textContent="\\u2713 Downloaded";');
+  parts.push('    });');
+  parts.push('  },600);');
+  parts.push('};');
+  parts.push('<\/script>');
+
+  // Score banner
+  parts.push('<div style="background:#243046;border-top:1px solid rgba(255,255,255,.08);padding:0 40px 0">');
+  parts.push('<div style="max-width:1060px;margin:0 auto;display:flex;gap:0">');
+  var mets=[
+    {v:'97.34%',l:'Sifos Interop Index',c:'#00c47c',bg:'rgba(0,196,124,.12)'},
+    {v:'125',   l:'Tests PASSED',       c:'#4ade80',bg:'rgba(74,222,128,.08)'},
+    {v:'2',     l:'Tests FAILED',       c:'#f87171',bg:'rgba(248,113,113,.08)'},
+    {v:'4',     l:'DUTs Tested',        c:'#60a5fa',bg:'rgba(96,165,250,.08)'},
+  ];
+  mets.forEach(function(m){
+    parts.push('<div style="flex:1;padding:20px 24px;background:'+m.bg+';border-right:1px solid rgba(255,255,255,.06);text-align:center">');
+    parts.push('<div style="font-size:30px;font-weight:800;color:'+m.c+';line-height:1">'+m.v+'</div>');
+    parts.push('<div style="font-size:11px;color:#9aa3b0;margin-top:5px">'+m.l+'</div>');
+    parts.push('</div>');
+  });
+  parts.push('</div></div>');
+
+  // Body
+  parts.push('<div id="rpt-body" style="max-width:1060px;margin:28px auto;padding:0 24px">');
+
+  // DUT results
+  parts.push('<div style="background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:20px;overflow:hidden">');
+  parts.push('<div style="padding:16px 22px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;gap:10px">');
+  parts.push('<div style="width:4px;height:18px;background:#00c47c;border-radius:2px"></div>');
+  parts.push('<span style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px">DUT Test Results</span>');
+  parts.push('</div>');
+  var duts=[
+    {name:'M4350-44M4X4V',port:'48 ports · 802.3bt Type4',pass:32,fail:0,ok:true},
+    {name:'M4350-24X8F8V',port:'24 ports · 802.3bt Type4',pass:31,fail:0,ok:true},
+    {name:'M4350-24G4XF', port:'24 ports · 802.3at',       pass:31,fail:0,ok:true},
+    {name:'M4350-40X4C',  port:'40 ports · 802.3bt Type4 · FW Bug',pass:31,fail:2,ok:false},
+  ];
+  duts.forEach(function(d){
+    var bg=d.ok?'#fff':'#fff8f8';
+    parts.push('<div style="background:'+bg+';padding:14px 22px;border-bottom:1px solid #f0f2f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">');
+    parts.push('<div>');
+    parts.push('<span style="font-family:monospace;font-size:14px;font-weight:700;color:#243046">'+d.name+'</span>');
+    parts.push('<span style="font-size:11px;color:#9aa3b0;margin-left:10px">'+d.port+'</span>');
+    parts.push('</div>');
+    parts.push('<div style="display:flex;align-items:center;gap:16px">');
+    parts.push('<span style="font-size:13px;font-weight:700;color:#065f46">'+d.pass+' PASS</span>');
+    parts.push('<span style="font-size:13px;font-weight:700;color:'+(d.fail>0?'#dc2626':'#d1d5db')+'">'+d.fail+' FAIL</span>');
+    if(d.ok){
+      parts.push('<span style="background:#dcfce7;color:#166534;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700">PASS</span>');
+    } else {
+      parts.push('<span style="background:#fee2e2;color:#dc2626;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700">FAIL</span>');
+    }
+    parts.push('</div></div>');
+  });
+  parts.push('</div>');
+
+  // Conformance test table
+  parts.push('<div style="background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:20px;overflow:hidden">');
+  parts.push('<div style="padding:16px 22px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;gap:10px">');
+  parts.push('<div style="width:4px;height:18px;background:#0097d6;border-radius:2px"></div>');
+  parts.push('<span style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px">Conformance Tests — All 20 Categories</span>');
+  parts.push('</div>');
+  parts.push('<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">');
+  parts.push('<thead><tr style="background:#f7f9fc">');
+  ['Test ID','Category','Expected','Measured','Result','Notes'].forEach(function(h){
+    parts.push('<th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e8edf3;white-space:nowrap">'+h+'</th>');
+  });
+  parts.push('</tr></thead><tbody>'+rows+'</tbody></table></div></div>');
+
+  // Anomaly report
+  parts.push('<div style="background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:20px;overflow:hidden">');
+  parts.push('<div style="padding:16px 22px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;gap:10px">');
+  parts.push('<div style="width:4px;height:18px;background:#dc2626;border-radius:2px"></div>');
+  parts.push('<span style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px">AI Anomaly Report</span>');
+  parts.push('</div>');
+  parts.push('<div style="padding:20px 22px">');
+  parts.push('<div style="background:#fff1f1;border:1px solid #fca5a5;border-left:4px solid #dc2626;border-radius:8px;padding:18px 20px;margin-bottom:16px">');
+  parts.push('<div style="font-size:14px;font-weight:700;color:#dc2626;margin-bottom:14px">FAIL &nbsp;—&nbsp; class_lldp &nbsp;·&nbsp; M4350-40X4C &nbsp;·&nbsp; FW v14.0.4.8</div>');
+  var anomRows=[
+    ['Affected DUT','M4350-40X4C only (M4350-44M4X4V, 24X8F8V, 24G4XF: PASS)'],
+    ['Failing Ports','Port 3-2 (Port 1) · Port 4-2 (Port 40)'],
+    ['Test Cases','Pclass_LLDP_22.7 · Pclass_LLDP_24.5'],
+    ['Expected','LLDP Power Class = 1'],
+    ['Actual','LLDP Power Class = 0   ← BUG'],
+    ['Root Cause','LLDP Power Class negotiation bug in FW v14.0.4.8. Class advertisement returns 0 during physical classification handshake. Silent failure — no error flag surfaced in switch GUI.'],
+    ['Impact','PDs relying on LLDP power class advertisement may receive insufficient power budget. Severity: Medium.'],
+  ];
+  anomRows.forEach(function(r){
+    var isActual=r[0]==='Actual';
+    parts.push('<div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px">');
+    parts.push('<span style="color:#9aa3b0;font-weight:600;min-width:110px;flex-shrink:0">'+r[0]+'</span>');
+    parts.push('<span style="color:'+(isActual?'#dc2626':'#374151')+';font-weight:'+(isActual?'700':'400')+'">'+r[1]+'</span>');
+    parts.push('</div>');
+  });
+  parts.push('</div>');
+
+  // Recommendations
+  parts.push('<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #00c47c;border-radius:8px;padding:18px 20px">');
+  parts.push('<div style="font-size:12px;font-weight:700;color:#00875a;margin-bottom:12px">AI Recommendations</div>');
+  var recs=[
+    'Immediate workaround: Configure Max Power Grant = PHY (not LLDP / PHY+LLDP) on all M4350-40X4C ports.',
+    'File firmware bug report against M4350-40X4C v14.0.4.8 — LLDP Power Class negotiation defect.',
+    'Re-run class_lldp test case after firmware patch is applied to confirm resolution.',
+    'No action required for M4350-44M4X4V, M4350-24X8F8V, M4350-24G4XF — all pass class_lldp.',
+  ];
+  recs.forEach(function(r){
+    parts.push('<div style="display:flex;gap:10px;margin-bottom:8px;font-size:12px;color:#374151">');
+    parts.push('<span style="color:#00c47c;font-weight:700;flex-shrink:0">→</span>');
+    parts.push('<span>'+r+'</span></div>');
+  });
+  parts.push('</div></div></div>');
+
+  parts.push('</div>');// end body
+
+  // Footer
+  parts.push('<div style="background:#243046;color:#9aa3b0;text-align:center;padding:18px 24px;font-size:11px;margin-top:8px">');
+  parts.push('IntelliPoE POC &nbsp;·&nbsp; TEC SMB SQA &nbsp;·&nbsp; Cora Lin &amp; Julian Chen &nbsp;·&nbsp; NETGEAR Hackathon 2025 &nbsp;·&nbsp; AI-Generated Report');
+  parts.push('</div>');
+  parts.push('</body></html>');
+
+  var blob=new Blob([parts.join('')],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  toast('📄 Report opened!');
+}
 
 </script>
 <!-- Center Modal -->
