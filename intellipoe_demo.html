@@ -543,11 +543,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <div style="margin-bottom:8px;padding:6px 8px;background:#f0f7ff;border:1px solid #bfdbfe;border-radius:6px;display:flex;align-items:center;gap:8px">
       <span style="font-size:10px;font-weight:700;color:#1d4ed8">DUT Model:</span>
       <select id="conf-dut-sel" onchange="onConfDutChange()" style="font-size:11px;padding:3px 6px;border:1px solid #93c5fd;border-radius:4px;color:#1d4ed8;font-weight:600">
-        <option value="all">All 4 DUTs (M4350 v14.0.4.8)</option>
-        <option value="44M4X4V">M4350-44M4X4V</option>
-        <option value="24X8F8V">M4350-24X8F8V</option>
-        <option value="24G4XF">M4350-24G4XF</option>
-        <option value="40X4C">M4350-40X4C ⚠ LLDP Bug</option>
+        <option value="all">All DUTs (M4350 v14.0.4.8)</option>
+        <optgroup label="── 802.3at (PoE+) ──">
+          <option value="24G4XF">M4350-24G4XF</option>
+          <option value="48G4XF">M4350-48G4XF</option>
+          <option value="24X4V">M4350-24X4V</option>
+        </optgroup>
+        <optgroup label="── 802.3bt Type4 (PoE++) ──">
+          <option value="44M4X4V">M4350-44M4X4V</option>
+          <option value="24X8F8V">M4350-24X8F8V</option>
+          <option value="36X4V">M4350-36X4V</option>
+          <option value="40X4C">M4350-40X4C ⚠ LLDP Bug</option>
+          <option value="8M2V">M4350-8M2V</option>
+          <option value="24M4X4V">M4350-24M4X4V</option>
+          <option value="16M4V">M4350-16M4V</option>
+        </optgroup>
       </select>
       <span style="font-size:10px;color:#9aa3b0;margin-left:auto">Sifos PSA v5.4.11 · 2025-02-03</span>
     </div>
@@ -2065,14 +2075,16 @@ function onConfDutChange(){
   const v=document.getElementById('conf-dut-sel').value;
   const lldpEl=document.getElementById('t-class_lldp');
   if(!lldpEl)return;
+  // Remove all state classes first
+  lldpEl.classList.remove('real-fail','real-pass','pass','fail');
   if(v==='40X4C'){
     lldpEl.classList.add('real-fail');
     lldpEl.querySelector('.cbs').innerHTML='<span class="sf">FAIL</span>';
   } else if(v==='all'){
-    lldpEl.classList.remove('real-fail','pass');
-    lldpEl.querySelector('.cbs').innerHTML='<span style="font-size:9px;color:#dc2626">2/4 FAIL</span>';
+    lldpEl.classList.remove('real-fail');
+    lldpEl.querySelector('.cbs').innerHTML='<span style="font-size:9px;color:#dc2626">⚠ 1/10 FAIL</span>';
   } else {
-    lldpEl.classList.remove('real-fail');lldpEl.classList.add('real-pass');
+    lldpEl.classList.add('real-pass');
     lldpEl.querySelector('.cbs').innerHTML='<span class="sp">PASS</span>';
   }
 }
